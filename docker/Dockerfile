@@ -51,6 +51,7 @@ RUN apt update \
         --without-heif --without-avif --without-raqm \
     && make -j$(nproc) \
     && make install && cd .. \
+    && tar -zxf GeoIP-1.6.12.tar.gz \
     && cd GeoIP-1.6.12 \
     && ./configure --prefix=/usr/local --enable-static --disable-shared \
     && make -j$(nproc) \
