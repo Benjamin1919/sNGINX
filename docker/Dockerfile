@@ -127,8 +127,6 @@ FROM alpine:latest
 
 WORKDIR /
 
-COPY --from=builder /usr/local/sbin/nginx /usr/local/bin/
-
 RUN addgroup -S -g 101 nginx \
     && adduser -S -H -D -h /nonexistent -s /sbin/nologin -G nginx -u 101 nginx \
     && mkdir -p /etc/nginx/conf.d \
@@ -137,8 +135,9 @@ RUN addgroup -S -g 101 nginx \
     && chown -R nginx:nginx /var/log/nginx \
     && chown -R nginx:nginx /var/tmp/nginx_tmp
 
+COPY --from=builder /usr/local/sbin/nginx        /usr/local/bin/
 COPY --from=builder /usr/local/share/nginx/conf/ /etc/nginx/
-COPY --from=builder /usr/local/share/nginx/html /usr/local/share/html
+COPY --from=builder /usr/local/share/nginx/html  /usr/local/share/html
 COPY conf/nginx.conf /etc/nginx/
 
 STOPSIGNAL SIGQUIT
