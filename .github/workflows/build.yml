@@ -1,4 +1,4 @@
-name: Build and publish sNginx image
+name: Build and publish sNGINX image
 
 on:
   schedule:
@@ -15,26 +15,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Convert to lowercase
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          REPO_FULLNAME: "${{ github.repository }}"
+        run: |
+          echo "IMAGE_OWNER=${REPO_OWNER,,}" >> ${GITHUB_ENV}
+          echo "IMAGE_NAME=${REPO_NAME,,}" >> ${GITHUB_ENV}
+          echo "IMAGE_FULLNAME=${REPO_FULLNAME,,}" >> ${GITHUB_ENV}
+
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install dependencies
-        run: sudo apt update && sudo apt install --no-install-recommends --no-install-suggests -y ca-certificates curl jq
+        run: |
+          sudo apt update
+          sudo apt install --no-install-recommends --no-install-suggests -y ca-certificates curl jq
 
       - name: Get latest version of Nginx
         run: bash scripts/get-ngx-ver.sh
-
-      - name: Convert owner name to lowercase
-        env:
-          REPO_OWNER: ${{ github.repository_owner }}
-        run: echo "DOCKER_OWNER=${REPO_OWNER,,}" >> $GITHUB_ENV
 
       - name: Check if Nginx version already exists in GHCR
         id: check_version
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          IMAGE_OWNER: ${{ env.DOCKER_OWNER }}
-          IMAGE_NAME: snginx
           TAG: ${{ env.NGINX_VERSION }}
         run: |
           set -euo pipefail
@@ -43,8 +48,10 @@ jobs:
           AUTH_HEADER="Authorization: Bearer ${GHCR_TOKEN}"
 
           echo "Querying ${API_URL} for existing tags..."
-          RESP=$(curl -s -H "${AUTH_HEADER}" -H "Accept: application/vnd.github+json" "${API_URL}")
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "${AUTH_HEADER}" -H "Accept: application/vnd.github+json" "${API_URL}")
+          RESP=$(curl -s -w "\n%{http_code}" -H "${AUTH_HEADER}" -H "Accept: application/vnd.github+json" "${API_URL}")
+          STATUS_CODE=$(echo "$RESP" | tail -n1)
+          BODY=$(echo "$RESP" | sed '$d')
+
           echo "GHCR API response status code: ${STATUS_CODE}"
 
           case $STATUS_CODE in
@@ -56,7 +63,6 @@ jobs:
               ;;
             404)
               echo "🚀 No packages found. Proceeding with build."
-              echo "should_skip=false" >> $GITHUB_OUTPUT
               ;;
             *)
               echo "❌ Unexpected status code: ${STATUS_CODE}"
@@ -64,22 +70,34 @@ jobs:
               ;;
           esac
 
-          FOUND=$(echo "${RESP}" | jq -r '.[] | .metadata.container.tags[]?' | grep -Fx "${TAG}" || true)
+          FOUND=$(echo "${BODY}" | jq -r '.[] | .metadata.container.tags[]?' | grep -Fx "${TAG}" || true)
 
           if [ -n "${FOUND}" ]; then
             echo "✅ Image tag ${TAG} already exists. Skipping build and push."
-            echo "should_skip=true" >> "$GITHUB_OUTPUT"
-          else
+            echo "SKIP_BUILD=true" >> ${GITHUB_ENV}
+          elif [ "${STATUS_CODE}"="200" ]; then
             echo "🚀 Image tag ${TAG} not found. Proceeding with build."
-            echo "should_skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Add summary if build skipped
+        if: env.SKIP_BUILD == 'true'
+        run: |
+          echo "### 🟡 Build Skipped" >> ${GITHUB_STEP_SUMMARY}
+          echo "The image tag **${{ env.NGINX_VERSION }}** already exists in GHCR." >> ${GITHUB_STEP_SUMMARY}
+          echo "No new build or push was performed." >> ${GITHUB_STEP_SUMMARY}
+          exit 0
+
       - name: Get latest versions of dependencies
-        if: steps.check_version.outputs.should_skip != 'true'
         run: bash scripts/get-dep-ver.sh
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Docker image
-        if: steps.check_version.outputs.should_skip != 'true'
         run: |
           docker build \
             --build-arg LIBXML2_VERSION=${{ env.LIBXML2_VERSION }} \
@@ -91,16 +109,11 @@ jobs:
             --build-arg NGINX_VERSION=${{ env.NGINX_VERSION }} \
             --no-cache \
             -f docker/Dockerfile \
-            -t ghcr.io/${{ env.DOCKER_OWNER }}/snginx:latest \
-            -t ghcr.io/${{ env.DOCKER_OWNER }}/snginx:${{ env.NGINX_VERSION }} \
+            -t ghcr.io/${{ env.IMAGE_FULLNAME }}:${{ env.NGINX_VERSION }} \
+            -t ghcr.io/${{ env.IMAGE_FULLNAME }}:latest \
             .
 
-      - name: Login to GitHub Container Registry
-        if: steps.check_version.outputs.should_skip != 'true'
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-
       - name: Push Docker images
-        if: steps.check_version.outputs.should_skip != 'true'
         run: |
-          docker push ghcr.io/${{ env.DOCKER_OWNER }}/snginx:${{ env.NGINX_VERSION }}
-          docker push ghcr.io/${{ env.DOCKER_OWNER }}/snginx:latest
+          docker push ghcr.io/${{ env.IMAGE_FULLNAME }}:${{ env.NGINX_VERSION }}
+          docker push ghcr.io/${{ env.IMAGE_FULLNAME }}:latest
