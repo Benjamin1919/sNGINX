@@ -2,7 +2,7 @@ name: Build and publish sNGINX image
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 8 * * *"
   push:
     branches: [ main ]
     paths:
@@ -130,4 +130,5 @@ jobs:
             ZLIB_VERSION=${{ env.ZLIB_VERSION }}
             PCRE2_VERSION=${{ env.PCRE2_VERSION }}
             NGINX_VERSION=${{ env.NGINX_VERSION }}
-          no-cache: true
+          no-cache: false
+          provenance: false
