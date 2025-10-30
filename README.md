@@ -1,2 +1,2 @@
-# sNginx
-A static compiled Nginx docker image
+# sNGINX
+  A static compiled NGINX docker image
