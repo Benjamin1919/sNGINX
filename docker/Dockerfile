@@ -39,7 +39,7 @@ RUN cd libxml2-v${LIBXML2_VERSION} \
     && make -j$(nproc) \
     && make install
 
-RUN cd ../libxslt-v${LIBXSLT_VERSION} \
+RUN cd libxslt-v${LIBXSLT_VERSION} \
     && ./autogen.sh --prefix=/usr/local --enable-static --disable-shared \
     && make -j$(nproc) \
     && make install
@@ -52,7 +52,7 @@ RUN apt install --no-install-recommends --no-install-suggests -y \
     libvpx-dev x11proto-dev libxau-dev libxdmcp-dev libxcb1-dev \
     xtrans-dev libx11-dev libxpm-dev
 
-RUN cd ../libgd-${LIBGD_VERSION} \
+RUN cd libgd-${LIBGD_VERSION} \
     && ./configure --prefix=/usr/local --enable-static --disable-shared \
         --disable-gd-formats --with-zlib --with-png --with-freetype \
         --with-fontconfig --with-jpeg --with-liq --with-xpm --with-tiff --with-webp \
@@ -60,12 +60,12 @@ RUN cd ../libgd-${LIBGD_VERSION} \
     && make -j$(nproc) \
     && make install
 
-RUN cd ../GeoIP-1.6.12 \
+RUN cd GeoIP-1.6.12 \
     && ./configure --prefix=/usr/local --enable-static --disable-shared \
     && make -j$(nproc) \
     && make install
 
-RUN cd ../nginx-${NGINX_VERSION} \
+RUN cd nginx-${NGINX_VERSION} \
     && mkdir -p /usr/local/share/nginx \
     && cp -r ./conf /usr/local/share/nginx/ \
     && cp -r ./html /usr/local/share/nginx/ \
