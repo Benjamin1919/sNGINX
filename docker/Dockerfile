@@ -11,56 +11,61 @@ ARG NGINX_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /usr/local/src
 
-RUN apt update \
-    && apt install --no-install-recommends --no-install-suggests -y \
-    ca-certificates wget \
-    && (wget -q "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${LIBXML2_VERSION}/libxml2-v${LIBXML2_VERSION}.tar.gz" || { echo "❌ Failed to fetch libxml2 from GitLab"; exit 1; }) \
-    && (wget -q "https://gitlab.gnome.org/GNOME/libxslt/-/archive/v${LIBXSLT_VERSION}/libxslt-v${LIBXSLT_VERSION}.tar.gz" || { echo "❌ Failed to fetch libxslt from GitLab"; exit 1; }) \
-    && (wget -q "https://github.com/libgd/libgd/releases/download/gd-${LIBGD_VERSION}/libgd-${LIBGD_VERSION}.tar.gz" || { echo "❌ Failed to fetch libgd from GitHub"; exit 1; }) \
-    && (wget -q "https://github.com/maxmind/geoip-api-c/releases/download/v1.6.12/GeoIP-1.6.12.tar.gz" || { echo "❌ Failed to fetch GeoIP from GitHub"; exit 1; }) \
-    && (wget -q "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz" || { echo "❌ Failed to fetch OpenSSL from GitHub"; exit 1; }) \
-    && (wget -q "https://github.com/madler/zlib/releases/download/v${ZLIB_VERSION}/zlib-${ZLIB_VERSION}.tar.gz" || { echo "❌ Failed to fetch zlib from GitHub"; exit 1; }) \
-    && (wget -q "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${PCRE2_VERSION}/pcre2-${PCRE2_VERSION}.tar.gz" || { echo "❌ Failed to fetch PCRE2 from GitHub"; exit 1; }) \
-    && (wget -q "https://github.com/nginx/nginx/releases/download/release-${NGINX_VERSION}/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch Nginx from GitHub"; exit 1; }) \
-    && apt install --no-install-recommends --no-install-suggests -y \
-    build-essential pkg-config \
-    autoconf automake libtool \
-    python3-dev nasm \
-    && tar -zxf libxml2-v${LIBXML2_VERSION}.tar.gz \
-    && cd libxml2-v${LIBXML2_VERSION} \
+RUN apt update
+
+RUN apt install --no-install-recommends --no-install-suggests -y ca-certificates wget
+RUN (wget -q "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${LIBXML2_VERSION}/libxml2-v${LIBXML2_VERSION}.tar.gz" || { echo "❌ Failed to fetch libxml2 from GitLab"; exit 1; }) \
+    && tar -zxf libxml2-v${LIBXML2_VERSION}.tar.gz
+RUN (wget -q "https://gitlab.gnome.org/GNOME/libxslt/-/archive/v${LIBXSLT_VERSION}/libxslt-v${LIBXSLT_VERSION}.tar.gz" || { echo "❌ Failed to fetch libxslt from GitLab"; exit 1; }) \
+    && tar -zxf libxslt-v${LIBXSLT_VERSION}.tar.gz
+RUN (wget -q "https://github.com/libgd/libgd/releases/download/gd-${LIBGD_VERSION}/libgd-${LIBGD_VERSION}.tar.gz" || { echo "❌ Failed to fetch libgd from GitHub"; exit 1; }) \
+    && tar -zxf libgd-${LIBGD_VERSION}.tar.gz
+RUN (wget -q "https://github.com/maxmind/geoip-api-c/releases/download/v1.6.12/GeoIP-1.6.12.tar.gz" || { echo "❌ Failed to fetch GeoIP from GitHub"; exit 1; }) \
+    && tar -zxf GeoIP-1.6.12.tar.gz
+RUN (wget -q "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz" || { echo "❌ Failed to fetch OpenSSL from GitHub"; exit 1; }) \
+    && tar -zxf openssl-${OPENSSL_VERSION}.tar.gz
+RUN (wget -q "https://github.com/madler/zlib/releases/download/v${ZLIB_VERSION}/zlib-${ZLIB_VERSION}.tar.gz" || { echo "❌ Failed to fetch zlib from GitHub"; exit 1; }) \
+    && tar -zxf zlib-${ZLIB_VERSION}.tar.gz
+RUN (wget -q "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${PCRE2_VERSION}/pcre2-${PCRE2_VERSION}.tar.gz" || { echo "❌ Failed to fetch PCRE2 from GitHub"; exit 1; }) \
+    && tar -zxf pcre2-${PCRE2_VERSION}.tar.gz
+RUN (wget -q "https://github.com/nginx/nginx/releases/download/release-${NGINX_VERSION}/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch Nginx from GitHub"; exit 1; }) \
+    && tar -zxf nginx-${NGINX_VERSION}.tar.gz
+
+RUN apt install --no-install-recommends --no-install-suggests -y \
+    build-essential pkg-config autoconf automake libtool python3-dev nasm
+
+RUN cd libxml2-v${LIBXML2_VERSION} \
     && ./autogen.sh --prefix=/usr/local --enable-static --disable-shared \
     && make -j$(nproc) \
-    && make install && cd .. \
-    && tar -zxf libxslt-v${LIBXSLT_VERSION}.tar.gz \
-    && cd libxslt-v${LIBXSLT_VERSION} \
+    && make install
+
+RUN cd ../libxslt-v${LIBXSLT_VERSION} \
     && ./autogen.sh --prefix=/usr/local --enable-static --disable-shared \
     && make -j$(nproc) \
-    && make install && cd .. \
-    && tar -zxf libgd-${LIBGD_VERSION}.tar.gz \
-    && apt install --no-install-recommends --no-install-suggests -y \
+    && make install
+
+RUN apt install --no-install-recommends --no-install-suggests -y \
     zlib1g-dev libbrotli-dev libbz2-dev libpng-dev libfreetype-dev \
     libexpat1-dev uuid-dev libfontconfig-dev libsharpyuv-dev \
     libimagequant-dev libjpeg62-turbo-dev libdeflate-dev libjbig-dev \
     liblerc-dev liblzma-dev libwebp-dev libzstd-dev libtiff-dev \
     libvpx-dev x11proto-dev libxau-dev libxdmcp-dev libxcb1-dev \
-    xtrans-dev libx11-dev libxpm-dev \
-    && cd libgd-${LIBGD_VERSION} \
+    xtrans-dev libx11-dev libxpm-dev
+
+RUN cd ../libgd-${LIBGD_VERSION} \
     && ./configure --prefix=/usr/local --enable-static --disable-shared \
         --disable-gd-formats --with-zlib --with-png --with-freetype \
         --with-fontconfig --with-jpeg --with-liq --with-xpm --with-tiff --with-webp \
         --without-heif --without-avif --without-raqm \
     && make -j$(nproc) \
-    && make install && cd .. \
-    && tar -zxf GeoIP-1.6.12.tar.gz \
-    && cd GeoIP-1.6.12 \
+    && make install
+
+RUN cd ../GeoIP-1.6.12 \
     && ./configure --prefix=/usr/local --enable-static --disable-shared \
     && make -j$(nproc) \
-    && make install && cd .. \
-    && tar -zxf openssl-${OPENSSL_VERSION}.tar.gz \
-    && tar -zxf zlib-${ZLIB_VERSION}.tar.gz \
-    && tar -zxf pcre2-${PCRE2_VERSION}.tar.gz \
-    && tar -zxf nginx-${NGINX_VERSION}.tar.gz \
-    && cd nginx-${NGINX_VERSION} \
+    && make install
+
+RUN cd ../nginx-${NGINX_VERSION} \
     && mkdir -p /usr/local/share/nginx \
     && cp -r ./conf /usr/local/share/nginx/ \
     && cp -r ./html /usr/local/share/nginx/ \
@@ -130,6 +135,7 @@ WORKDIR /
 RUN addgroup -S -g 101 nginx \
     && adduser -S -H -D -h /nonexistent -s /sbin/nologin -G nginx -u 101 nginx \
     && mkdir -p /etc/nginx/conf.d \
+    && mkdir -p /etc/nginx/ssl \
     && mkdir -p /var/log/nginx \
     && mkdir -p /var/tmp/nginx_tmp/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
     && chown -R nginx:nginx /var/log/nginx \
@@ -139,6 +145,9 @@ COPY --from=builder /usr/local/sbin/nginx        /usr/local/bin/
 COPY --from=builder /usr/local/share/nginx/conf/ /etc/nginx/
 COPY --from=builder /usr/local/share/nginx/html  /usr/local/share/html
 COPY conf/nginx.conf /etc/nginx/
+
+VOLUME /var/log/nginx
+VOLUME /var/tmp/nginx_tmp
 
 STOPSIGNAL SIGQUIT
 
