@@ -14,6 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       skip_build: ${{ steps.check_version.outputs.skip_build }}
+      IMAGE_OWNER: ${{ steps.env2op.outputs.IMAGE_OWNER }}
+      IMAGE_NAME: ${{ steps.env2op.outputs.IMAGE_NAME }}
+      IMAGE_FULLNAME: ${{ steps.env2op.outputs.IMAGE_FULLNAME }}
+      NGINX_VERSION: ${{ steps.env2op.outputs.NGINX_VERSION }}
+      LIBXML2_VERSION: ${{ steps.env2op.outputs.LIBXML2_VERSION }}
+      LIBXSLT_VERSION: ${{ steps.env2op.outputs.LIBXSLT_VERSION }}
+      LIBGD_VERSION: ${{ steps.env2op.outputs.LIBGD_VERSION }}
+      OPENSSL_VERSION: ${{ steps.env2op.outputs.OPENSSL_VERSION }}
+      ZLIB_VERSION: ${{ steps.env2op.outputs.ZLIB_VERSION }}
+      PCRE2_VERSION: ${{ steps.env2op.outputs.PCRE2_VERSION }}
     steps:
       - name: Convert to lowercase
         env:
@@ -91,6 +101,21 @@ jobs:
       - name: Get latest versions of dependencies
         if: steps.check_version.outputs.skip_build == 'false'
         run: bash scripts/get-dep-ver.sh
+      
+      - name: Put env into outputs
+        id: env2op
+        if: steps.check_version.outputs.skip_build == 'false'
+        run: |
+          echo "IMAGE_OWNER=${{ env.IMAGE_OWNER }}" >> ${GITHUB_OUTPUT}
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" >> ${GITHUB_OUTPUT}
+          echo "IMAGE_FULLNAME=${{ env.IMAGE_FULLNAME }}" >> ${GITHUB_OUTPUT}
+          echo "NGINX_VERSION=${{ env.NGINX_VERSION }}" >> ${GITHUB_OUTPUT}
+          echo "LIBXML2_VERSION=${{ env.LIBXML2_VERSION }}" >> ${GITHUB_OUTPUT}
+          echo "LIBXSLT_VERSION=${{ env.LIBXSLT_VERSION }}" >> ${GITHUB_OUTPUT}
+          echo "LIBGD_VERSION=${{ env.LIBGD_VERSION }}" >> ${GITHUB_OUTPUT}
+          echo "OPENSSL_VERSION=${{ env.OPENSSL_VERSION }}" >> ${GITHUB_OUTPUT}
+          echo "ZLIB_VERSION=${{ env.ZLIB_VERSION }}" >> ${GITHUB_OUTPUT}
+          echo "PCRE2_VERSION=${{ env.PCRE2_VERSION }}" >> ${GITHUB_OUTPUT}
 
 
   build:
@@ -129,20 +154,20 @@ jobs:
           platforms: ${{ matrix.platform }}
           push: true
           tags:
-            ghcr.io/${{ env.IMAGE_FULLNAME }}:${{ env.NGINX_VERSION }}-${{ matrix.arch }}
+            ghcr.io/${{ needs.prepare.outputs.IMAGE_FULLNAME }}:${{ needs.prepare.outputs.NGINX_VERSION }}-${{ matrix.arch }}
           build-args: |
-            LIBXML2_VERSION=${{ env.LIBXML2_VERSION }}
-            LIBXSLT_VERSION=${{ env.LIBXSLT_VERSION }}
-            LIBGD_VERSION=${{ env.LIBGD_VERSION }}
-            OPENSSL_VERSION=${{ env.OPENSSL_VERSION }}
-            ZLIB_VERSION=${{ env.ZLIB_VERSION }}
-            PCRE2_VERSION=${{ env.PCRE2_VERSION }}
-            NGINX_VERSION=${{ env.NGINX_VERSION }}
+            LIBXML2_VERSION=${{ needs.prepare.outputs.LIBXML2_VERSION }}
+            LIBXSLT_VERSION=${{ needs.prepare.outputs.LIBXSLT_VERSION }}
+            LIBGD_VERSION=${{ needs.prepare.outputs.LIBGD_VERSION }}
+            OPENSSL_VERSION=${{ needs.prepare.outputs.OPENSSL_VERSION }}
+            ZLIB_VERSION=${{ needs.prepare.outputs.ZLIB_VERSION }}
+            PCRE2_VERSION=${{ needs.prepare.outputs.PCRE2_VERSION }}
+            NGINX_VERSION=${{ needs.prepare.outputs.NGINX_VERSION }}
           no-cache: false
           provenance: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          outputs: type=image,name=${{ env.IMAGE_FULLNAME }},push=true,digest-file=${{ runner.temp }}/digest.txt
+          outputs: type=image,name=${{ needs.prepare.outputs.IMAGE_FULLNAME }},push=true,digest-file=${{ runner.temp }}/digest.txt
       
       - name: Upload digest artifact
         uses: actions/upload-artifact@v4
@@ -183,5 +208,5 @@ jobs:
 
           docker buildx imagetools create \
             --append ${DIGESTS} \
-            -t ghcr.io/${{ env.IMAGE_FULLNAME }}:${{ env.NGINX_VERSION }} \
-            -t ghcr.io/${{ env.IMAGE_FULLNAME }}:latest
+            -t ghcr.io/${{ needs.prepare.outputs.IMAGE_FULLNAME }}:${{ needs.prepare.outputs.NGINX_VERSION }} \
+            -t ghcr.io/${{ needs.prepare.outputs.IMAGE_FULLNAME }}:latest
