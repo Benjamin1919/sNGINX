@@ -122,7 +122,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push multi-arch Docker image
-        if: env.SKIP_BUILD == 'false'
         uses: docker/build-push-action@v6
         with:
           context: .
