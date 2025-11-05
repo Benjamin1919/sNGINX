@@ -82,14 +82,14 @@ jobs:
           fi
 
       - name: Add summary if build skipped
-        if: outputs.skip_build == 'true'
+        if: check_version.outputs.skip_build == 'true'
         run: |
           echo "### 🟡 Build Skipped" >> ${GITHUB_STEP_SUMMARY}
           echo "The image tag **${{ env.NGINX_VERSION }}** already exists in GHCR." >> ${GITHUB_STEP_SUMMARY}
           echo "No new build or push was performed." >> ${GITHUB_STEP_SUMMARY}
 
       - name: Get latest versions of dependencies
-        if: outputs.skip_build == 'false'
+        if: check_version.outputs.skip_build == 'false'
         run: bash scripts/get-dep-ver.sh
 
 
