@@ -13,7 +13,7 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      skip_build: ${{ steps.check.outputs.skip_build }}
+      skip_build: ${{ steps.check_version.outputs.skip_build }}
     steps:
       - name: Convert to lowercase
         env:
@@ -82,14 +82,14 @@ jobs:
           fi
 
       - name: Add summary if build skipped
-        if: check_version.outputs.skip_build == 'true'
+        if: steps.check_version.outputs.skip_build == 'true'
         run: |
           echo "### 🟡 Build Skipped" >> ${GITHUB_STEP_SUMMARY}
           echo "The image tag **${{ env.NGINX_VERSION }}** already exists in GHCR." >> ${GITHUB_STEP_SUMMARY}
           echo "No new build or push was performed." >> ${GITHUB_STEP_SUMMARY}
 
       - name: Get latest versions of dependencies
-        if: check_version.outputs.skip_build == 'false'
+        if: steps.check_version.outputs.skip_build == 'false'
         run: bash scripts/get-dep-ver.sh
 
 
