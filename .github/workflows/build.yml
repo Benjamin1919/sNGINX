@@ -12,6 +12,8 @@ permissions:
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    outputs:
+      skip_build: ${{ steps.check.outputs.skip_build }}
     steps:
       - name: Convert to lowercase
         env:
@@ -61,7 +63,7 @@ jobs:
               ;;
             404)
               echo "🚀 No packages found. Proceeding with build."
-              echo "SKIP_BUILD=false" >> ${GITHUB_ENV}
+              echo "skip_build=false" >> ${GITHUB_OUTPUT}
               ;;
             *)
               echo "❌ Unexpected status code: ${STATUS_CODE}"
@@ -73,27 +75,27 @@ jobs:
 
           if [ -n "${FOUND}" ]; then
             echo "✅ Image tag ${TAG} already exists. Skipping build and push."
-            echo "SKIP_BUILD=true" >> ${GITHUB_ENV}
+            echo "skip_build=true" >> ${GITHUB_OUTPUT}
           elif [ "${STATUS_CODE}"="200" ]; then
             echo "🚀 Image tag ${TAG} not found. Proceeding with build."
-            echo "SKIP_BUILD=false" >> ${GITHUB_ENV}
+            echo "skip_build=false" >> ${GITHUB_OUTPUT}
           fi
 
       - name: Add summary if build skipped
-        if: env.SKIP_BUILD == 'true'
+        if: outputs.skip_build == 'true'
         run: |
           echo "### 🟡 Build Skipped" >> ${GITHUB_STEP_SUMMARY}
           echo "The image tag **${{ env.NGINX_VERSION }}** already exists in GHCR." >> ${GITHUB_STEP_SUMMARY}
           echo "No new build or push was performed." >> ${GITHUB_STEP_SUMMARY}
 
       - name: Get latest versions of dependencies
-        if: env.SKIP_BUILD == 'false'
+        if: outputs.skip_build == 'false'
         run: bash scripts/get-dep-ver.sh
 
 
   build:
     needs: prepare
-    if: env.SKIP_BUILD == 'false'
+    if: needs.prepare.outputs.skip_build == 'false'
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
