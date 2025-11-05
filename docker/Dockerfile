@@ -127,20 +127,25 @@ RUN cd nginx-${NGINX_VERSION} \
     && make install \
     && strip /usr/local/sbin/nginx
 
-
-FROM alpine:latest
-
-WORKDIR /
-
-RUN addgroup -S -g 101 nginx \
-    && adduser -S -H -D -h /nonexistent -s /sbin/nologin -G nginx -u 101 nginx \
-    && mkdir -p /etc/nginx/conf.d \
-    && mkdir -p /etc/nginx/ssl \
+RUN mkdir -p /etc/nginx/conf.d \
     && mkdir -p /var/log/nginx \
     && mkdir -p /var/tmp/nginx_tmp/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
     && chown -R nginx:nginx /var/log/nginx \
     && chown -R nginx:nginx /var/tmp/nginx_tmp
 
+RUN grep '^nginx:' /etc/passwd > /tmp/passwd \
+    && grep '^nginx:' /etc/group > /tmp/group
+
+
+FROM gcr.io/distroless/static:nonroot
+
+WORKDIR /
+
+COPY --from=builder /tmp/group                   /etc/group
+COPY --from=builder /tmp/passwd                  /etc/passwd
+COPY --from=builder /etc/nginx                   /etc/nginx
+COPY --from=builder /var/log/nginx               /var/log/nginx
+COPY --from=builder /var/tmp/nginx_tmp           /var/tmp/nginx_tmp
 COPY --from=builder /usr/local/sbin/nginx        /usr/local/bin/
 COPY --from=builder /usr/local/share/nginx/conf/ /etc/nginx/
 COPY --from=builder /usr/local/share/nginx/html  /usr/local/share/html
