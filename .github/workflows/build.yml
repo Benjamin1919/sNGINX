@@ -29,7 +29,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install --no-install-recommends --no-install-suggests -y ca-certificates curl jq
+          sudo apt upgrade -y
+        # sudo apt install --no-install-recommends --no-install-suggests -y ca-certificates curl jq
 
       - name: Get latest version of Nginx
         run: bash scripts/get-ngx-ver.sh
