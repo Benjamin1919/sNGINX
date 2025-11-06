@@ -146,7 +146,7 @@ COPY --from=builder /tmp/passwd                  /etc/passwd
 COPY --from=builder /etc/nginx                   /etc/nginx
 COPY --from=builder /var/log/nginx               /var/log/nginx
 COPY --from=builder /var/tmp/nginx_tmp           /var/tmp/nginx_tmp
-COPY --from=builder /usr/local/sbin/nginx        /usr/local/bin/
+COPY --from=builder /usr/local/sbin/nginx        /usr/bin/
 COPY --from=builder /usr/local/share/nginx/conf/ /etc/nginx/
 COPY --from=builder /usr/local/share/nginx/html  /usr/local/share/html
 COPY conf/nginx.conf /etc/nginx/
