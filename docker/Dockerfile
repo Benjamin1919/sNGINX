@@ -11,9 +11,8 @@ ARG NGINX_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /usr/local/src
 
-RUN apt update
+RUN apt update && apt install --no-install-recommends --no-install-suggests -y ca-certificates wget
 
-RUN apt install --no-install-recommends --no-install-suggests -y ca-certificates wget
 RUN (wget -q "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${LIBXML2_VERSION}/libxml2-v${LIBXML2_VERSION}.tar.gz" || { echo "❌ Failed to fetch libxml2 from GitLab"; exit 1; }) \
     && tar -zxf libxml2-v${LIBXML2_VERSION}.tar.gz
 RUN (wget -q "https://gitlab.gnome.org/GNOME/libxslt/-/archive/v${LIBXSLT_VERSION}/libxslt-v${LIBXSLT_VERSION}.tar.gz" || { echo "❌ Failed to fetch libxslt from GitLab"; exit 1; }) \
