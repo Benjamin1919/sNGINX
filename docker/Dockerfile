@@ -69,7 +69,7 @@ RUN cd nginx-${NGINX_VERSION} \
     && cp -r ./conf /usr/local/share/nginx/ \
     && cp -r ./html /usr/local/share/nginx/ \
     && groupadd --system --gid 101 nginx \
-    && useradd --system --gid nginx --no-create-home --home /nonexistent --comment "nginx user" --shell /bin/false --uid 101 nginx \
+    && useradd --system --gid nginx --no-create-home --home /nonexistent --shell /bin/false --uid 101 nginx \
     && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip)" \
     && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip)" \
     && ./configure \
