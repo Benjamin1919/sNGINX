@@ -9,6 +9,7 @@ ARG PCRE2_VERSION
 ARG NGINX_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
 WORKDIR /usr/local/src
 
 RUN apt update && apt install --no-install-recommends --no-install-suggests -y ca-certificates wget
@@ -64,17 +65,18 @@ RUN cd GeoIP-1.6.12 \
     && make -j$(nproc) \
     && make install
 
-RUN groupadd --system --gid 101 nginx \
-    && useradd --system --gid nginx --no-create-home --home /nonexistent --shell /bin/false --uid 101 nginx \
+RUN echo "nginx:x:101:" >> /etc/group \
+    && echo "nginx:x:101:101:nginx:/nonexistent:/sbin/nologin" >> /etc/passwd \
     && mkdir -p /etc/nginx/conf.d \
+    && mkdir -p /etc/nginx/ssl \
     && mkdir -p /var/log/nginx \
     && mkdir -p /var/tmp/nginx_tmp/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
     && chown -R nginx:nginx /var/log/nginx \
     && chown -R nginx:nginx /var/tmp/nginx_tmp
 
 RUN cd nginx-${NGINX_VERSION} \
-    && cp -r ./conf/ /etc/nginx/ \
-    && cp -r ./html /usr/local/share/ \
+    && cp ./conf/. /etc/nginx/ \
+    && cp ./html /usr/local/share/ \
     && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip)" \
     && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip)" \
     && ./configure \
@@ -136,13 +138,13 @@ FROM gcr.io/distroless/static-debian13:latest
 
 WORKDIR /
 
-COPY --from=builder /etc/nginx             /etc/nginx
-COPY --from=builder /var/log/nginx         /var/log/nginx
-COPY --from=builder /var/tmp/nginx_tmp     /var/tmp/nginx_tmp
+COPY --from=builder /etc/nginx             /etc/
+COPY --from=builder /var/log/nginx         /var/log/
+COPY --from=builder /var/tmp/nginx_tmp     /var/tmp/
 COPY --from=builder /usr/local/sbin/nginx  /usr/local/sbin/
-COPY --from=builder /usr/local/share/html  /usr/local/share/html
-COPY distroless/etc/group  /etc/group
-COPY distroless/etc/passwd /etc/passwd
+COPY --from=builder /usr/local/share/html  /usr/local/share/
+COPY distroless/etc/group  /etc/
+COPY distroless/etc/passwd /etc/
 COPY conf/nginx.conf       /etc/nginx/
 
 VOLUME /var/log/nginx
