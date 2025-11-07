@@ -75,7 +75,7 @@ RUN echo "nginx:x:101:" >> /etc/group \
     && chown -R nginx:nginx /var/tmp/nginx_tmp
 
 RUN cd nginx-${NGINX_VERSION} \
-    && cp -r ./conf/. /etc/nginx/ \
+    && cp ./conf/* /etc/nginx/ \
     && cp -r ./html /usr/local/share/ \
     && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip)" \
     && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip)" \
@@ -138,11 +138,11 @@ FROM gcr.io/distroless/static-debian13:latest
 
 WORKDIR /
 
-COPY --from=builder /etc/nginx             /etc/
-COPY --from=builder /var/log/nginx         /var/log/
-COPY --from=builder /var/tmp/nginx_tmp     /var/tmp/
+COPY --from=builder /etc/nginx             /etc/nginx
+COPY --from=builder /var/log/nginx         /var/log/nginx
+COPY --from=builder /var/tmp/nginx_tmp     /var/tmp/nginx_tmp
 COPY --from=builder /usr/local/sbin/nginx  /usr/local/sbin/
-COPY --from=builder /usr/local/share/html  /usr/local/share/
+COPY --from=builder /usr/local/share/html  /usr/local/share/html
 COPY distroless/etc/group  /etc/
 COPY distroless/etc/passwd /etc/
 COPY conf/nginx.conf       /etc/nginx/
