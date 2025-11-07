@@ -3,3 +3,4 @@ nobody:x:65534:
 tty:x:5:
 staff:x:50:
 nonroot:x:65532:
+nginx:x:101:
