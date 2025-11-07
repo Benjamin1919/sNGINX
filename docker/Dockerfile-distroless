@@ -11,9 +11,8 @@ ARG NGINX_VERSION
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /usr/local/src
 
-RUN apt update
+RUN apt update && apt install --no-install-recommends --no-install-suggests -y ca-certificates wget
 
-RUN apt install --no-install-recommends --no-install-suggests -y ca-certificates wget
 RUN (wget -q "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${LIBXML2_VERSION}/libxml2-v${LIBXML2_VERSION}.tar.gz" || { echo "❌ Failed to fetch libxml2 from GitLab"; exit 1; }) \
     && tar -zxf libxml2-v${LIBXML2_VERSION}.tar.gz
 RUN (wget -q "https://gitlab.gnome.org/GNOME/libxslt/-/archive/v${LIBXSLT_VERSION}/libxslt-v${LIBXSLT_VERSION}.tar.gz" || { echo "❌ Failed to fetch libxslt from GitLab"; exit 1; }) \
@@ -65,12 +64,17 @@ RUN cd GeoIP-1.6.12 \
     && make -j$(nproc) \
     && make install
 
+RUN groupadd --system --gid 101 nginx \
+    && useradd --system --gid nginx --no-create-home --home /nonexistent --shell /bin/false --uid 101 nginx \
+    && mkdir -p /etc/nginx/conf.d \
+    && mkdir -p /var/log/nginx \
+    && mkdir -p /var/tmp/nginx_tmp/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
+    && chown -R nginx:nginx /var/log/nginx \
+    && chown -R nginx:nginx /var/tmp/nginx_tmp
+
 RUN cd nginx-${NGINX_VERSION} \
-    && mkdir -p /usr/local/share/nginx \
-    && cp -r ./conf /usr/local/share/nginx/ \
-    && cp -r ./html /usr/local/share/nginx/ \
-    && groupadd --system --gid 101 nginx \
-    && useradd --system --gid nginx --no-create-home --home /nonexistent --comment "nginx user" --shell /bin/false --uid 101 nginx \
+    && cp -r ./conf/ /etc/nginx/ \
+    && cp -r ./html /usr/local/share/ \
     && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip)" \
     && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip)" \
     && ./configure \
@@ -127,29 +131,19 @@ RUN cd nginx-${NGINX_VERSION} \
     && make install \
     && strip /usr/local/sbin/nginx
 
-RUN mkdir -p /etc/nginx/conf.d \
-    && mkdir -p /var/log/nginx \
-    && mkdir -p /var/tmp/nginx_tmp/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
-    && chown -R nginx:nginx /var/log/nginx \
-    && chown -R nginx:nginx /var/tmp/nginx_tmp
 
-RUN grep '^nginx:' /etc/passwd > /tmp/passwd \
-    && grep '^nginx:' /etc/group > /tmp/group
-
-
-FROM gcr.io/distroless/static:nonroot
+FROM gcr.io/distroless/static-debian13:latest
 
 WORKDIR /
 
-COPY --from=builder /tmp/group                   /etc/group
-COPY --from=builder /tmp/passwd                  /etc/passwd
-COPY --from=builder /etc/nginx                   /etc/nginx
-COPY --from=builder /var/log/nginx               /var/log/nginx
-COPY --from=builder /var/tmp/nginx_tmp           /var/tmp/nginx_tmp
-COPY --from=builder /usr/local/sbin/nginx        /usr/bin/
-COPY --from=builder /usr/local/share/nginx/conf/ /etc/nginx/
-COPY --from=builder /usr/local/share/nginx/html  /usr/local/share/html
-COPY conf/nginx.conf /etc/nginx/
+COPY --from=builder /etc/nginx             /etc/nginx
+COPY --from=builder /var/log/nginx         /var/log/nginx
+COPY --from=builder /var/tmp/nginx_tmp     /var/tmp/nginx_tmp
+COPY --from=builder /usr/local/sbin/nginx  /usr/local/sbin/
+COPY --from=builder /usr/local/share/html  /usr/local/share/html
+COPY distroless/etc/group  /etc/group
+COPY distroless/etc/passwd /etc/passwd
+COPY conf/nginx.conf       /etc/nginx/
 
 VOLUME /var/log/nginx
 VOLUME /var/tmp/nginx_tmp
