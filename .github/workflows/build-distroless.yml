@@ -126,7 +126,7 @@ jobs:
             ZLIB_VERSION=${{ env.ZLIB_VERSION }}
             PCRE2_VERSION=${{ env.PCRE2_VERSION }}
             NGINX_VERSION=${{ env.NGINX_VERSION }}
-          no-cache: false
+          no-cache: true
           provenance: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
