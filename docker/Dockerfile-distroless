@@ -75,7 +75,6 @@ RUN echo "nginx:x:101:" >> /etc/group \
     && chown -R nginx:nginx /var/tmp/nginx_tmp
 
 RUN cd nginx-${NGINX_VERSION} \
-    && cp ./conf/* /etc/nginx/ \
     && cp -r ./html /usr/local/share/ \
     && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip)" \
     && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip)" \
