@@ -3,8 +3,8 @@
 
 ## Example
 ```
-sudo docker run -d --name sNGINX --network host \
-      -v /usr/local/etc/nginx/nginx.conf /etc/nginx/nginx.conf \
-      -v /usr/local/etc/nginx/conf.d /etc/nginx/conf.d \
-      ghcr.io/benjamin1919/snginx
+docker run -d --name sNGINX --network host \
+    -v /usr/local/etc/nginx/nginx.conf /etc/nginx/nginx.conf \
+    -v /usr/local/etc/nginx/conf.d /etc/nginx/conf.d \
+    ghcr.io/benjamin1919/snginx:latest
 ```
