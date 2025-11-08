@@ -138,14 +138,17 @@ FROM gcr.io/distroless/static-debian13:latest
 
 WORKDIR /
 
+COPY distroless/etc/group         /etc/
+COPY distroless/etc/passwd        /etc/
+COPY distroless/etc/nsswitch.conf /etc/
+
+COPY --from=builder --chown=nginx:nginx /var/log/nginx/     /var/log/nginx/
+COPY --from=builder --chown=nginx:nginx /var/tmp/nginx_tmp/ /var/tmp/nginx_tmp/
 COPY --from=builder /etc/nginx/            /etc/nginx/
-COPY --from=builder /var/log/nginx/        /var/log/nginx/
-COPY --from=builder /var/tmp/nginx_tmp/    /var/tmp/nginx_tmp/
 COPY --from=builder /usr/local/sbin/nginx  /usr/local/sbin/
 COPY --from=builder /usr/local/share/html/ /usr/local/share/html/
-COPY distroless/etc/group  /etc/
-COPY distroless/etc/passwd /etc/
-COPY conf/nginx.conf       /etc/nginx/
+
+COPY conf/nginx.conf /etc/nginx/
 
 VOLUME /var/log/nginx
 VOLUME /var/tmp/nginx_tmp
