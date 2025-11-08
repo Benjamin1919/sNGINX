@@ -129,8 +129,10 @@ RUN cd nginx-${NGINX_VERSION} \
         --with-cc-opt="-static -O3 -pipe -pthread -fopenmp -fstack-protector-strong -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -mtune=generic ${NGX_CFLAG}" \
         --with-ld-opt="-static -Wl,-O1 ${NGX_LFLAG}" \
     && make -j$(nproc) \
-    && make install \
-    && strip /usr/local/sbin/nginx
+    && make install
+
+RUN strip /usr/local/sbin/nginx \
+    && rm -f /etc/nginx/*.default
 
 
 FROM gcr.io/distroless/static-debian13:latest
