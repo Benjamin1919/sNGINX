@@ -9,6 +9,7 @@ ARG PCRE2_VERSION
 ARG NGINX_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
 WORKDIR /usr/local/src
 
 RUN apt update && apt install --no-install-recommends --no-install-suggests -y ca-certificates wget
@@ -136,13 +137,17 @@ RUN addgroup -S -g 101 nginx \
     && mkdir -p /etc/nginx/conf.d \
     && mkdir -p /etc/nginx/ssl \
     && mkdir -p /var/log/nginx \
-    && mkdir -p /var/tmp/nginx_tmp/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
+    && mkdir -p /var/tmp/nginx_tmp/client_body_temp \
+    && mkdir -p /var/tmp/nginx_tmp/proxy_temp \
+    && mkdir -p /var/tmp/nginx_tmp/fastcgi_temp \
+    && mkdir -p /var/tmp/nginx_tmp/uwsgi_temp \
+    && mkdir -p /var/tmp/nginx_tmp/scgi_temp \
     && chown -R nginx:nginx /var/log/nginx \
     && chown -R nginx:nginx /var/tmp/nginx_tmp
 
 COPY --from=builder /usr/local/sbin/nginx        /usr/local/bin/
 COPY --from=builder /usr/local/share/nginx/conf/ /etc/nginx/
-COPY --from=builder /usr/local/share/nginx/html  /usr/local/share/html
+COPY --from=builder /usr/local/share/nginx/html/ /usr/local/share/html/
 COPY conf/nginx.conf /etc/nginx/
 
 VOLUME /var/log/nginx
@@ -150,4 +155,4 @@ VOLUME /var/tmp/nginx_tmp
 
 STOPSIGNAL SIGQUIT
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/usr/local/bin/nginx", "-g", "daemon off;"]
