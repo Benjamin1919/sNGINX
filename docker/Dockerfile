@@ -139,17 +139,17 @@ FROM gcr.io/distroless/static-debian13:latest
 
 WORKDIR /
 
-COPY distroless/etc/group         /etc/
-COPY distroless/etc/passwd        /etc/
-COPY distroless/etc/nsswitch.conf /etc/
+COPY --chown=root:root --chmod=644 distroless/etc/group         /etc/
+COPY --chown=root:root --chmod=644 distroless/etc/passwd        /etc/
+COPY --chown=root:root --chmod=644 distroless/etc/nsswitch.conf /etc/
 
-COPY --from=builder --chown=nginx:nginx /var/log/nginx/     /var/log/nginx/
-COPY --from=builder --chown=nginx:nginx /var/tmp/nginx_tmp/ /var/tmp/nginx_tmp/
-COPY --from=builder /etc/nginx/            /etc/nginx/
-COPY --from=builder /usr/local/sbin/nginx  /usr/local/sbin/
-COPY --from=builder /usr/local/share/html/ /usr/local/share/html/
+COPY --from=builder --chown=nginx:nginx --chmod=644 /var/log/nginx/        /var/log/nginx/
+COPY --from=builder --chown=nginx:nginx --chmod=644 /var/tmp/nginx_tmp/    /var/tmp/nginx_tmp/
+COPY --from=builder --chown=root:root   --chmod=644 /etc/nginx/            /etc/nginx/
+COPY --from=builder --chown=root:root   --chmod=755 /usr/local/sbin/nginx  /usr/local/sbin/
+COPY --from=builder --chown=root:root   --chmod=644 /usr/local/share/html/ /usr/local/share/html/
 
-COPY conf/nginx.conf /etc/nginx/
+COPY --chown=root:root --chmod=644 conf/nginx.conf /etc/nginx/
 
 VOLUME /var/log/nginx
 VOLUME /var/tmp/nginx_tmp
