@@ -81,11 +81,11 @@ RUN cd nginx-${NGINX_VERSION} \
         --pid-path=/var/run/nginx.pid \
         --lock-path=/var/run/nginx.lock \
         --http-log-path=/var/log/nginx/access.log \
-        --http-client-body-temp-path=/var/tmp/nginx_tmp/client_body_temp \
-        --http-proxy-temp-path=/var/tmp/nginx_tmp/proxy_temp \
-        --http-fastcgi-temp-path=/var/tmp/nginx_tmp/fastcgi_temp \
-        --http-uwsgi-temp-path=/var/tmp/nginx_tmp/uwsgi_temp \
-        --http-scgi-temp-path=/var/tmp/nginx_tmp/scgi_temp \
+        --http-client-body-temp-path=/var/tmp/nginx/client_body_temp \
+        --http-proxy-temp-path=/var/tmp/nginx/proxy_temp \
+        --http-fastcgi-temp-path=/var/tmp/nginx/fastcgi_temp \
+        --http-uwsgi-temp-path=/var/tmp/nginx/uwsgi_temp \
+        --http-scgi-temp-path=/var/tmp/nginx/scgi_temp \
         --user=nginx \
         --group=nginx \
         --with-threads \
@@ -137,13 +137,13 @@ RUN addgroup -S -g 101 nginx \
     && mkdir -p /etc/nginx/conf.d \
     && mkdir -p /etc/nginx/ssl \
     && mkdir -p /var/log/nginx \
-    && mkdir -p /var/tmp/nginx_tmp/client_body_temp \
-    && mkdir -p /var/tmp/nginx_tmp/proxy_temp \
-    && mkdir -p /var/tmp/nginx_tmp/fastcgi_temp \
-    && mkdir -p /var/tmp/nginx_tmp/uwsgi_temp \
-    && mkdir -p /var/tmp/nginx_tmp/scgi_temp \
+    && mkdir -p /var/tmp/nginx/client_body_temp \
+    && mkdir -p /var/tmp/nginx/proxy_temp \
+    && mkdir -p /var/tmp/nginx/fastcgi_temp \
+    && mkdir -p /var/tmp/nginx/uwsgi_temp \
+    && mkdir -p /var/tmp/nginx/scgi_temp \
     && chown -R nginx:nginx /var/log/nginx \
-    && chown -R nginx:nginx /var/tmp/nginx_tmp
+    && chown -R nginx:nginx /var/tmp/nginx
 
 COPY --from=builder /usr/local/sbin/nginx        /usr/local/bin/
 COPY --from=builder /usr/local/share/nginx/conf/ /etc/nginx/
@@ -151,7 +151,7 @@ COPY --from=builder /usr/local/share/nginx/html/ /usr/local/share/html/
 COPY conf/nginx.conf /etc/nginx/
 
 VOLUME /var/log/nginx
-VOLUME /var/tmp/nginx_tmp
+VOLUME /var/tmp/nginx
 
 STOPSIGNAL SIGQUIT
 
