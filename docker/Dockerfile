@@ -70,9 +70,9 @@ RUN echo "nginx:x:101:" >> /etc/group \
     && mkdir -p /etc/nginx/conf.d \
     && mkdir -p /etc/nginx/ssl \
     && mkdir -p /var/log/nginx \
-    && mkdir -p /var/tmp/nginx_tmp/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
+    && mkdir -p /var/tmp/nginx/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
     && chown -R nginx:nginx /var/log/nginx \
-    && chown -R nginx:nginx /var/tmp/nginx_tmp
+    && chown -R nginx:nginx /var/tmp/nginx
 
 RUN cd nginx-${NGINX_VERSION} \
     && cp -r ./html /usr/local/share/ \
@@ -86,11 +86,11 @@ RUN cd nginx-${NGINX_VERSION} \
         --pid-path=/var/run/nginx.pid \
         --lock-path=/var/run/nginx.lock \
         --http-log-path=/var/log/nginx/access.log \
-        --http-client-body-temp-path=/var/tmp/nginx_tmp/client_body_temp \
-        --http-proxy-temp-path=/var/tmp/nginx_tmp/proxy_temp \
-        --http-fastcgi-temp-path=/var/tmp/nginx_tmp/fastcgi_temp \
-        --http-uwsgi-temp-path=/var/tmp/nginx_tmp/uwsgi_temp \
-        --http-scgi-temp-path=/var/tmp/nginx_tmp/scgi_temp \
+        --http-client-body-temp-path=/var/tmp/nginx/client_body_temp \
+        --http-proxy-temp-path=/var/tmp/nginx/proxy_temp \
+        --http-fastcgi-temp-path=/var/tmp/nginx/fastcgi_temp \
+        --http-uwsgi-temp-path=/var/tmp/nginx/uwsgi_temp \
+        --http-scgi-temp-path=/var/tmp/nginx/scgi_temp \
         --user=nginx \
         --group=nginx \
         --with-threads \
@@ -144,7 +144,7 @@ COPY --chown=root:root --chmod=644 distroless/etc/passwd        /etc/
 COPY --chown=root:root --chmod=644 distroless/etc/nsswitch.conf /etc/
 
 COPY --from=builder --chown=nginx:nginx --chmod=644 /var/log/nginx/        /var/log/nginx/
-COPY --from=builder --chown=nginx:nginx --chmod=644 /var/tmp/nginx_tmp/    /var/tmp/nginx_tmp/
+COPY --from=builder --chown=nginx:nginx --chmod=644 /var/tmp/nginx/        /var/tmp/nginx/
 COPY --from=builder --chown=root:root   --chmod=644 /etc/nginx/            /etc/nginx/
 COPY --from=builder --chown=root:root   --chmod=555 /usr/local/sbin/nginx  /usr/local/sbin/
 COPY --from=builder --chown=root:root   --chmod=644 /usr/local/share/html/ /usr/local/share/html/
@@ -152,7 +152,7 @@ COPY --from=builder --chown=root:root   --chmod=644 /usr/local/share/html/ /usr/
 COPY --chown=root:root --chmod=644 conf/nginx.conf /etc/nginx/
 
 VOLUME /var/log/nginx
-VOLUME /var/tmp/nginx_tmp
+VOLUME /var/tmp/nginx
 
 STOPSIGNAL SIGQUIT
 
