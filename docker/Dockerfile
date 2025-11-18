@@ -156,4 +156,4 @@ VOLUME /var/tmp/nginx
 
 STOPSIGNAL SIGQUIT
 
-CMD ["/usr/local/sbin/nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
