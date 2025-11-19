@@ -13,7 +13,7 @@
 
 ## Usage
 Before creating a docker container, you should do these things on your host:
-* Put your own `nginx.conf` in `/usr/local/etc/nginx` and other conf files in `/usr/local/etc/nginx/conf.d`
+* Put your own `nginx.conf` ([reference](https://raw.githubusercontent.com/Benjamin1919/sNGINX/refs/heads/main/conf/nginx.conf)) in `/usr/local/etc/nginx` and other conf files in `/usr/local/etc/nginx/conf.d`
 * Install or copy your certificates to `/usr/local/etc/nginx/ssl`
 * Copy the resource files of your website to `/usr/local/share/html`
 * Create the directory `/var/log/nginx`
