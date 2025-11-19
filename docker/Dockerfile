@@ -132,7 +132,7 @@ RUN cd nginx-${NGINX_VERSION} \
     && make install
 
 RUN strip /usr/local/sbin/nginx \
-    && rm -f /etc/nginx/*.default
+    && rm -f /etc/nginx/*.default \
     && mkdir -p /tmp/etc
 
 COPY --from=gcr.io/distroless/static-debian13:latest /etc/group /etc/passwd /tmp/etc/
