@@ -133,15 +133,19 @@ RUN cd nginx-${NGINX_VERSION} \
 
 RUN strip /usr/local/sbin/nginx \
     && rm -f /etc/nginx/*.default
+    && mkdir -p /tmp/etc
+
+COPY --from=gcr.io/distroless/static-debian13:latest /etc/group /etc/passwd /tmp/etc/
+RUN echo "nginx:x:101:" >> /tmp/etc/group \
+    && echo "nginx:x:101:101:nginx:/nonexistent:/sbin/nologin" >> /tmp/etc/passwd
 
 
 FROM gcr.io/distroless/static-debian13:latest
 
 WORKDIR /
 
-COPY --chown=root:root --chmod=644 distroless/etc/group         /etc/
-COPY --chown=root:root --chmod=644 distroless/etc/passwd        /etc/
-COPY --chown=root:root --chmod=644 distroless/etc/nsswitch.conf /etc/
+COPY --from=builder --chown=root:root --chmod=644 /tmp/etc/group /tmp/etc/passwd /etc/
+COPY                --chown=root:root --chmod=644 distroless/etc/nsswitch.conf   /etc/
 
 COPY --from=builder --chown=nginx:nginx --chmod=644 /var/log/nginx/        /var/log/nginx/
 COPY --from=builder --chown=nginx:nginx --chmod=644 /var/tmp/nginx/        /var/tmp/nginx/
