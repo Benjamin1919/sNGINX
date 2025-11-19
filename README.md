@@ -4,10 +4,12 @@
 ## Feature
 - Including almost all the official modules (except perl, otel, njs and experimental modules)
 - With HTTP/3 support
-- Built with latest release source code of nginx, openssl and other dependencies
+- Built with the latest release source code of nginx, openssl and other dependencies
 - Statically compiled on Debian and packaged by distroless
 - The size of this image is less than 20MB, much smaller than the official nginx image
 - Safer than the official nginx image thanks to distroless (no shell inside the image)
+- Daily check the latest version of nginx and build a new image if a new version comes out
+- Add webp support for http_image_filter_module
 
 ## Usage
 Before creating a docker container, you should do these things on your host:
@@ -26,7 +28,7 @@ docker run -d --name sNGINX --network host \
     --mount type=bind,src=/var/log/nginx,dst=/var/log/nginx \
     ghcr.io/benjamin1919/snginx:latest
 ```
-* Note: It's not recommended to mount the whole  `/etc/nginx` directory because other files in this directory (fastcgi_params, fastcgi.conf, koi-utf, koi-win, mime.types, scgi_params, uwsgi_params, win-utf) will disappear
+* Note: It's better not to mount the whole  `/etc/nginx` directory because other files in this directory (fastcgi_params, fastcgi.conf, koi-utf, koi-win, mime.types, scgi_params, uwsgi_params, win-utf) will disappear
 
 ## Default Behavior
 If simply creat a container using the command:
@@ -48,4 +50,3 @@ then mount:
 ```
 --mount type=volume,src=nginx_tmp,dst=/var/tmp/nginx
 ```
-
