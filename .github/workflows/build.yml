@@ -138,3 +138,16 @@ jobs:
           provenance: false
 #          cache-from: type=gha
 #          cache-to: type=gha,mode=max
+
+      - name: Add summary if a new image is built
+        if: env.SKIP_BUILD == 'false'
+        run: |
+          echo "### 🎉 Succeed in building a new image !" >> ${GITHUB_STEP_SUMMARY}
+          echo "**Version info:**" >> ${GITHUB_STEP_SUMMARY}
+          echo "- nginx: ${{ env.NGINX_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- openssl: ${{ env.OPENSSL_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- libxml2: ${{ env.LIBXML2_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- libxslt: ${{ env.LIBXSLT_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- libgd: ${{ env.LIBGD_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- zlib: ${{ env.ZLIB_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- pcre2: ${{ env.PCRE2_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
