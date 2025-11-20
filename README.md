@@ -4,8 +4,8 @@
 ## Feature
 - Including almost all the official modules (except perl, otel, njs and experimental modules)
 - With HTTP/3 support
-- Built with the latest release source code of nginx, openssl and other dependencies
-- Statically compiled on Debian and packaged by distroless
+- Built with the latest released source code of nginx, openssl and other dependencies
+- Statically compiled on Debian and packaged with distroless
 - The size of this image is less than 20MB, much smaller than the official nginx image
 - Safer than the official nginx image thanks to distroless (no shell inside the image)
 - Daily check the latest version of nginx and build a new image if a new version comes out
