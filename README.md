@@ -31,14 +31,14 @@ docker run -d --name sNGINX --network host \
 * Note: It's better not to mount the whole  `/etc/nginx` directory because other files in this directory (fastcgi_params, fastcgi.conf, koi-utf, koi-win, mime.types, scgi_params, uwsgi_params, win-utf) will disappear
 
 ## Default Behavior
-If simply creat a container using the command:
+If a container is simply created using the command:
 ```
 docker run -d --name sNGINX --network host ghcr.io/benjamin1919/snginx:latest
 ```
 - The container will listen on port 8080 (both IPv4 and IPv6) and a welcome page of nginx will appear if you visit `http://localhost:8080` with a browser on your host
 - Two anonymous volumes will be created (`/var/log/nginx` and `/var/tmp/nginx`) to avoid the container getting larger unexpectedly
 
-An anonymous volume won't be created if you mount the corresponding directory, for example:
+An anonymous volume won't be created if the corresponding directory is mounted, for example:
 ```
 --mount type=bind,src=/var/log/nginx,dst=/var/log/nginx
 ```
