@@ -50,3 +50,7 @@ then mount:
 ```
 --mount type=volume,src=nginx_tmp,dst=/var/tmp/nginx
 ```
+
+
+## Reference
+[Building Nginx from Sources](https://nginx.org/en/docs/configure.html)
