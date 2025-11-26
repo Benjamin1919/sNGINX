@@ -134,6 +134,9 @@ jobs:
             ZLIB_VERSION=${{ env.ZLIB_VERSION }}
             PCRE2_VERSION=${{ env.PCRE2_VERSION }}
             NGINX_VERSION=${{ env.NGINX_VERSION }}
+          labels: |
+            nginx_version=${{ env.NGINX_VERSION }}
+            maintainer=https://github.com/${{ github.repository }}
           no-cache: true
           provenance: false
 #          cache-from: type=gha
