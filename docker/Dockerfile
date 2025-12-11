@@ -147,11 +147,11 @@ WORKDIR /
 COPY --from=builder --chown=root:root --chmod=644 /tmp/etc/group /tmp/etc/passwd /etc/
 COPY                --chown=root:root --chmod=644 distroless/etc/nsswitch.conf   /etc/
 
-COPY --from=builder --chown=nginx:nginx --chmod=644 /var/log/nginx/        /var/log/nginx/
-COPY --from=builder --chown=nginx:nginx --chmod=644 /var/tmp/nginx/        /var/tmp/nginx/
-COPY --from=builder --chown=root:root   --chmod=644 /etc/nginx/            /etc/nginx/
+COPY --from=builder --chown=nginx:nginx --chmod=755 /var/log/nginx/        /var/log/nginx/
+COPY --from=builder --chown=nginx:nginx --chmod=755 /var/tmp/nginx/        /var/tmp/nginx/
+COPY --from=builder --chown=root:root   --chmod=755 /etc/nginx/            /etc/nginx/
 COPY --from=builder --chown=root:root   --chmod=555 /usr/local/sbin/nginx  /usr/local/sbin/
-COPY --from=builder --chown=root:root   --chmod=644 /usr/local/share/html/ /usr/local/share/html/
+COPY --from=builder --chown=root:root   --chmod=755 /usr/local/share/html/ /usr/local/share/html/
 
 COPY --chown=root:root --chmod=644 conf/nginx.conf /etc/nginx/
 
