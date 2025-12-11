@@ -149,7 +149,7 @@ COPY                --chown=root:root --chmod=644 distroless/etc/nsswitch.conf  
 
 COPY --from=builder --chown=nginx:nginx --chmod=755 /var/log/nginx/        /var/log/nginx/
 COPY --from=builder --chown=nginx:nginx --chmod=755 /var/tmp/nginx/        /var/tmp/nginx/
-COPY --from=builder --chown=nginx:nginx --chmod=755 /usr/local/share/html/ /usr/local/share/html/
+COPY --from=builder --chown=root:root   --chmod=755 /usr/local/share/html/ /usr/local/share/html/
 COPY --from=builder --chown=root:root   --chmod=755 /etc/nginx/            /etc/nginx/
 COPY --from=builder --chown=root:root   --chmod=555 /usr/local/sbin/nginx  /usr/local/sbin/
 
