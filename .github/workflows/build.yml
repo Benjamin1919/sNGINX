@@ -137,10 +137,11 @@ jobs:
           labels: |
             nginx_version=${{ env.NGINX_VERSION }}
             maintainer=https://github.com/${{ github.repository }}
-          no-cache: true
+#          no-cache: true
+          no-cache: false
           provenance: false
-#          cache-from: type=gha
-#          cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Add summary if a new image is built
         if: env.SKIP_BUILD == 'false'
