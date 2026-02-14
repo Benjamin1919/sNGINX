@@ -23,8 +23,8 @@ else
 fi
 
 if [ -z "$LIBXSLT_VERSION" ]; then
-  echo "❌ Failed to fetch libxslt latest version, fallback to 1.1.43"
-  LIBXSLT_VERSION=1.1.43
+  echo "❌ Failed to fetch libxslt latest version, fallback to 1.1.45"
+  LIBXSLT_VERSION=1.1.45
 else
   echo "✅ LIBXSLT_VERSION=$LIBXSLT_VERSION"
 fi
@@ -37,8 +37,8 @@ else
 fi
 
 if [ -z "$OPENSSL_VERSION" ]; then
-  echo "❌ Failed to fetch OpenSSL latest version, fallback to 3.6.0"
-  OPENSSL_VERSION=3.6.0
+  echo "❌ Failed to fetch OpenSSL latest version, fallback to 3.6.1"
+  OPENSSL_VERSION=3.6.1
 else
   echo "✅ OPENSSL_VERSION=$OPENSSL_VERSION"
 fi
