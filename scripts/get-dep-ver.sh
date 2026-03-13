@@ -16,8 +16,8 @@ ZLIB_VERSION=$(curl -s --connect-timeout 10 --retry 2 --retry-delay 5 "https://a
 PCRE2_VERSION=$(curl -s --connect-timeout 10 --retry 2 --retry-delay 5 "https://api.github.com/repos/PCRE2Project/pcre2/releases/latest" | jq -r '.tag_name | sub("^pcre2-"; "")')
 
 if [ -z "$LIBXML2_VERSION" ]; then
-  echo "❌ Failed to fetch libxml2 latest version, fallback to 2.15.1"
-  LIBXML2_VERSION=2.15.1
+  echo "❌ Failed to fetch libxml2 latest version, fallback to 2.15.2"
+  LIBXML2_VERSION=2.15.2
 else
   echo "✅ LIBXML2_VERSION=$LIBXML2_VERSION"
 fi
@@ -44,8 +44,8 @@ else
 fi
 
 if [ -z "$ZLIB_VERSION" ]; then
-  echo "❌ Failed to fetch zlib latest version, fallback to 1.3.1"
-  PCRE2_VERSION=1.3.1
+  echo "❌ Failed to fetch zlib latest version, fallback to 1.3.2"
+  PCRE2_VERSION=1.3.2
 else
   echo "✅ ZLIB_VERSION=$ZLIB_VERSION"
 fi
