@@ -136,6 +136,7 @@ jobs:
             NGINX_VERSION=${{ env.NGINX_VERSION }}
           labels: |
             nginx_version=${{ env.NGINX_VERSION }}
+            openssl_version=${{ env.OPENSSL_VERSION }}
             maintainer=https://github.com/${{ github.repository }}
 #          no-cache: true
           no-cache: false
