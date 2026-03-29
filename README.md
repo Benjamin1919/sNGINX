@@ -20,7 +20,7 @@ Before creating a docker container, you should do these things on your host:
 
 Then run the command:
 ```
-docker run -d --name sNGINX --network host \
+docker run -d --name sNGINX --network host --restart unless-stopped \
     --mount type=bind,src=/usr/local/etc/nginx/nginx.conf,dst=/etc/nginx/nginx.conf,ro \
     --mount type=bind,src=/usr/local/etc/nginx/conf.d,dst=/etc/nginx/conf.d,ro \
     --mount type=bind,src=/usr/local/etc/nginx/ssl,dst=/etc/nginx/ssl,ro \
