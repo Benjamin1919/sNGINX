@@ -65,14 +65,10 @@ RUN cd GeoIP-1.6.12 \
     && make -j$(nproc) \
     && make install
 
-RUN echo "nginx:x:101:" >> /etc/group \
-    && echo "nginx:x:101:101:nginx:/nonexistent:/sbin/nologin" >> /etc/passwd \
-    && mkdir -p /etc/nginx/conf.d \
+RUN mkdir -p /etc/nginx/conf.d \
     && mkdir -p /etc/nginx/ssl \
     && mkdir -p /var/log/nginx \
-    && mkdir -p /var/tmp/nginx/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp} \
-    && chown -R nginx:nginx /var/log/nginx \
-    && chown -R nginx:nginx /var/tmp/nginx
+    && mkdir -p /var/tmp/nginx/{client_body_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp}
 
 RUN cd nginx-${NGINX_VERSION} \
     && cp -r ./html /usr/local/share/ \
