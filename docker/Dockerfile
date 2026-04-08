@@ -28,8 +28,10 @@ RUN (wget -q "https://github.com/madler/zlib/releases/download/v${ZLIB_VERSION}/
     && tar -zxf zlib-${ZLIB_VERSION}.tar.gz
 RUN (wget -q "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${PCRE2_VERSION}/pcre2-${PCRE2_VERSION}.tar.gz" || { echo "❌ Failed to fetch PCRE2 from GitHub"; exit 1; }) \
     && tar -zxf pcre2-${PCRE2_VERSION}.tar.gz
-RUN (wget -q "https://github.com/nginx/nginx/releases/download/release-${NGINX_VERSION}/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch Nginx from GitHub"; exit 1; }) \
+RUN (wget -q "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch source code from Nginx"; exit 1; }) \
     && tar -zxf nginx-${NGINX_VERSION}.tar.gz
+# RUN (wget -q "https://github.com/nginx/nginx/releases/download/release-${NGINX_VERSION}/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch Nginx from GitHub"; exit 1; }) \
+#    && tar -zxf nginx-${NGINX_VERSION}.tar.gz
 
 RUN apt install --no-install-recommends --no-install-suggests -y \
     build-essential pkg-config autoconf automake libtool python3-dev nasm
