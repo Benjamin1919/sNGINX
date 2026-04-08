@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Fetching latest versions of dependencies"
+echo "Fetching latest versions of dependencies ..."
 
 LIBXML2_VERSION=$(curl -s --connect-timeout 10 --retry 2 --retry-delay 5 "https://gitlab.gnome.org/api/v4/projects/GNOME%2Flibxml2/releases" | jq -r '.[0].tag_name | sub("^v"; "")')
 
@@ -37,8 +37,8 @@ else
 fi
 
 if [ -z "$OPENSSL_VERSION" ]; then
-  echo "❌ Failed to fetch OpenSSL latest version, fallback to 3.6.1"
-  OPENSSL_VERSION=3.6.1
+  echo "❌ Failed to fetch OpenSSL latest version, fallback to 3.6.2"
+  OPENSSL_VERSION=3.6.2
 else
   echo "✅ OPENSSL_VERSION=$OPENSSL_VERSION"
 fi
