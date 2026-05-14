@@ -2,7 +2,7 @@ name: Build and publish sNGINX image
 
 on:
   schedule:
-    - cron: "0 7 * * *"
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
