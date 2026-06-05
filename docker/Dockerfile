@@ -32,7 +32,7 @@ RUN (wget -q "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${PC
     && tar -zxf pcre2-${PCRE2_VERSION}.tar.gz
 RUN (wget -q "https://github.com/maxmind/libmaxminddb/releases/download/${LIBMAXMINDDB_VERSION}/libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz" || { echo "❌ Failed to fetch libmaxminddb from Github"; exit 1; }) \
     && tar -zxf libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz
-RUN (wget -q "https://github.com/leev/ngx_http_geoip2_module/archive/refs/tags/${NGX_GEOIP2_VERSION}.tar.gz" || { echo "❌ Failed to fetch ngx_http_geoip2_module from Github"; exit 1; }) \
+RUN (wget -q --content-disposition "https://github.com/leev/ngx_http_geoip2_module/archive/refs/tags/${NGX_GEOIP2_VERSION}.tar.gz" || { echo "❌ Failed to fetch ngx_http_geoip2_module from Github"; exit 1; }) \
     && tar -zxf ngx_http_geoip2_module-${NGX_GEOIP2_VERSION}.tar.gz
 
 RUN (wget -q "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch source code from Nginx"; exit 1; }) \
