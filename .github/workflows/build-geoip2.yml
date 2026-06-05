@@ -3,6 +3,9 @@ name: Build and publish sNGINX-geoip2 image
 on:
 #  schedule:
 #    - cron: "0 0 * * *"
+  push:
+    branches:
+      - geoip2
   workflow_dispatch:
 
 permissions:
