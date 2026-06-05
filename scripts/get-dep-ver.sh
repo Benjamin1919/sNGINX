@@ -15,6 +15,11 @@ ZLIB_VERSION=$(curl -s --connect-timeout 10 --retry 2 --retry-delay 5 "https://a
 
 PCRE2_VERSION=$(curl -s --connect-timeout 10 --retry 2 --retry-delay 5 "https://api.github.com/repos/PCRE2Project/pcre2/releases/latest" | jq -r '.tag_name | sub("^pcre2-"; "")')
 
+LIBMAXMINDDB_VERSION=$(curl -s --connect-timeout 10 --retry 2 --retry-delay 5 "https://api.github.com/repos/maxmind/libmaxminddb/releases/latest" | jq -r '.tag_name')
+
+NGX_GEOIP2_VERSION=$(curl -s --connect-timeout 10 --retry 2 --retry-delay 5 "https://api.github.com/repos/leev/ngx_http_geoip2_module/releases/latest" | jq -r '.tag_name')
+
+
 if [ -z "$LIBXML2_VERSION" ]; then
   echo "❌ Failed to fetch libxml2 latest version, fallback to 2.15.2"
   LIBXML2_VERSION=2.15.2
@@ -57,6 +62,20 @@ else
   echo "✅ PCRE2_VERSION=$PCRE2_VERSION"
 fi
 
+if [ -z "$LIBMAXMINDDB_VERSION" ]; then
+  echo "❌ Failed to fetch libmaxminddb latest version, fallback to 1.13.3"
+  LIBMAXMINDDB_VERSION=1.13.3
+else
+  echo "✅ LIBMAXMINDDB_VERSION=$LIBMAXMINDDB_VERSION"
+fi
+
+if [ -z "$NGX_GEOIP2_VERSION" ]; then
+  echo "❌ Failed to fetch ngx_http_geoip2_module latest version, fallback to 3.4"
+  NGX_GEOIP2_VERSION=3.4
+else
+  echo "✅ NGX_GEOIP2_VERSION=$NGX_GEOIP2_VERSION"
+fi
+
 {
   echo "LIBXML2_VERSION=$LIBXML2_VERSION"
   echo "LIBXSLT_VERSION=$LIBXSLT_VERSION"
@@ -64,4 +83,6 @@ fi
   echo "OPENSSL_VERSION=$OPENSSL_VERSION"
   echo "ZLIB_VERSION=$ZLIB_VERSION"
   echo "PCRE2_VERSION=$PCRE2_VERSION"
+  echo "LIBMAXMINDDB_VERSION=$LIBMAXMINDDB_VERSION"
+  echo "NGX_GEOIP2_VERSION=$NGX_GEOIP2_VERSION"
 } >> "$GITHUB_ENV"
