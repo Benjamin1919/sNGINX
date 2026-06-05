@@ -74,6 +74,11 @@ RUN cd GeoIP-1.6.12 \
     && make -j$(nproc) \
     && make install
 
+RUN cd libmaxminddb-${LIBMAXMINDDB_VERSION} \
+    && ./configure --prefix=/usr/local --enable-static --disable-shared \
+    && make -j$(nproc) \
+    && make install
+
 RUN mkdir -p /etc/nginx/conf.d \
     && mkdir -p /etc/nginx/ssl \
     && mkdir -p /var/log/nginx \
@@ -81,8 +86,8 @@ RUN mkdir -p /etc/nginx/conf.d \
 
 RUN cd nginx-${NGINX_VERSION} \
     && cp -r ./html /usr/local/share/ \
-    && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip)" \
-    && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip)" \
+    && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip libmaxminddb)" \
+    && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip libmaxminddb)" \
     && ./configure \
         --prefix=/usr/local/nginx \
         --sbin-path=/usr/local/sbin/nginx \
