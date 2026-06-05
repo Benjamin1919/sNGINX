@@ -136,6 +136,7 @@ RUN cd nginx-${NGINX_VERSION} \
         --with-zlib=../zlib-${ZLIB_VERSION} \
         --with-pcre=../pcre2-${PCRE2_VERSION} \
         --with-pcre-jit \
+        --add-module=../ngx_http_geoip2_module-${NGX_GEOIP2_VERSION} \
         --with-cc-opt="-static -O3 -pipe -pthread -fopenmp -fstack-protector-strong -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -mtune=generic ${NGX_CFLAG}" \
         --with-ld-opt="-static -Wl,-O1 ${NGX_LFLAG}" \
     && make -j$(nproc) \
