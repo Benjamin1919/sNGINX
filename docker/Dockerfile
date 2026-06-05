@@ -30,6 +30,11 @@ RUN (wget -q "https://github.com/madler/zlib/releases/download/v${ZLIB_VERSION}/
     && tar -zxf zlib-${ZLIB_VERSION}.tar.gz
 RUN (wget -q "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${PCRE2_VERSION}/pcre2-${PCRE2_VERSION}.tar.gz" || { echo "❌ Failed to fetch PCRE2 from GitHub"; exit 1; }) \
     && tar -zxf pcre2-${PCRE2_VERSION}.tar.gz
+RUN (wget -q "https://github.com/maxmind/libmaxminddb/releases/download/${LIBMAXMINDDB_VERSION}/libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz" || { echo "❌ Failed to fetch libmaxminddb from Github"; exit 1; }) \
+    && tar -zxf libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz
+RUN (wget -q "https://github.com/leev/ngx_http_geoip2_module/archive/refs/tags/${NGX_GEOIP2_VERSION}.tar.gz" || { echo "❌ Failed to fetch ngx_http_geoip2_module from Github"; exit 1; }) \
+    && tar -zxf ngx_http_geoip2_module-${NGX_GEOIP2_VERSION}.tar.gz
+
 RUN (wget -q "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch source code from Nginx"; exit 1; }) \
     && tar -zxf nginx-${NGINX_VERSION}.tar.gz
 # RUN (wget -q "https://github.com/nginx/nginx/releases/download/release-${NGINX_VERSION}/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch Nginx from GitHub"; exit 1; }) \
