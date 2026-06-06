@@ -133,12 +133,20 @@ jobs:
             OPENSSL_VERSION=${{ env.OPENSSL_VERSION }}
             ZLIB_VERSION=${{ env.ZLIB_VERSION }}
             PCRE2_VERSION=${{ env.PCRE2_VERSION }}
+            LIBMAXMINDDB_VERSION=${{ env.LIBMAXMINDDB_VERSION }}
+            NGX_GEOIP2_VERSION=${{ env.NGX_GEOIP2_VERSION }}
             NGINX_VERSION=${{ env.NGINX_VERSION }}
           labels: |
             nginx_version=${{ env.NGINX_VERSION }}
             openssl_version=${{ env.OPENSSL_VERSION }}
             maintainer=https://github.com/${{ github.repository }}
-#          no-cache: true
+            libxml2_version=${{ env.LIBXML2_VERSION }}
+            libxslt_version=${{ env.LIBXSLT_VERSION }}
+            libgd_version=${{ env.LIBGD_VERSION }}
+            zlib_version=${{ env.ZLIB_VERSION }}
+            pcre2_version=${{ env.PCRE2_VERSION }}
+            libmaxminddb_version=${{ env.LIBMAXMINDDB_VERSION }}
+            ngx_geoip2_module_version=${{ env.NGX_GEOIP2_VERSION }}
           no-cache: false
           provenance: false
           cache-from: type=gha
@@ -156,3 +164,5 @@ jobs:
           echo "- libgd: ${{ env.LIBGD_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
           echo "- zlib: ${{ env.ZLIB_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
           echo "- pcre2: ${{ env.PCRE2_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- libmaxminddb: ${{ env.LIBMAXMINDDB_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- ngx_http_geoip2_module: ${{ env.NGX_GEOIP2_VERSION }}" >> ${GITHUB_STEP_SUMMARY}

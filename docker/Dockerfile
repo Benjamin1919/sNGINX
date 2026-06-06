@@ -7,6 +7,8 @@ ARG OPENSSL_VERSION
 ARG ZLIB_VERSION
 ARG PCRE2_VERSION
 ARG NGINX_VERSION
+ARG LIBMAXMINDDB_VERSION
+ARG NGX_GEOIP2_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
@@ -28,6 +30,11 @@ RUN (wget -q "https://github.com/madler/zlib/releases/download/v${ZLIB_VERSION}/
     && tar -zxf zlib-${ZLIB_VERSION}.tar.gz
 RUN (wget -q "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${PCRE2_VERSION}/pcre2-${PCRE2_VERSION}.tar.gz" || { echo "❌ Failed to fetch PCRE2 from GitHub"; exit 1; }) \
     && tar -zxf pcre2-${PCRE2_VERSION}.tar.gz
+RUN (wget -q "https://github.com/maxmind/libmaxminddb/releases/download/${LIBMAXMINDDB_VERSION}/libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz" || { echo "❌ Failed to fetch libmaxminddb from Github"; exit 1; }) \
+    && tar -zxf libmaxminddb-${LIBMAXMINDDB_VERSION}.tar.gz
+RUN (wget -q --content-disposition "https://github.com/leev/ngx_http_geoip2_module/archive/refs/tags/${NGX_GEOIP2_VERSION}.tar.gz" || { echo "❌ Failed to fetch ngx_http_geoip2_module from Github"; exit 1; }) \
+    && tar -zxf ngx_http_geoip2_module-${NGX_GEOIP2_VERSION}.tar.gz
+
 RUN (wget -q "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch source code from Nginx"; exit 1; }) \
     && tar -zxf nginx-${NGINX_VERSION}.tar.gz
 # RUN (wget -q "https://github.com/nginx/nginx/releases/download/release-${NGINX_VERSION}/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch Nginx from GitHub"; exit 1; }) \
@@ -67,6 +74,11 @@ RUN cd GeoIP-1.6.12 \
     && make -j$(nproc) \
     && make install
 
+RUN cd libmaxminddb-${LIBMAXMINDDB_VERSION} \
+    && ./configure --prefix=/usr/local --enable-static --disable-shared \
+    && make -j$(nproc) \
+    && make install
+
 RUN mkdir -p /etc/nginx/conf.d \
     && mkdir -p /etc/nginx/ssl \
     && mkdir -p /var/log/nginx \
@@ -74,8 +86,8 @@ RUN mkdir -p /etc/nginx/conf.d \
 
 RUN cd nginx-${NGINX_VERSION} \
     && cp -r ./html /usr/local/share/ \
-    && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip)" \
-    && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip)" \
+    && export NGX_CFLAG="$(pkg-config --cflags libexslt gdlib geoip libmaxminddb)" \
+    && export NGX_LFLAG="$(pkg-config --static --libs libexslt gdlib geoip libmaxminddb)" \
     && ./configure \
         --prefix=/usr/local/nginx \
         --sbin-path=/usr/local/sbin/nginx \
@@ -124,6 +136,7 @@ RUN cd nginx-${NGINX_VERSION} \
         --with-zlib=../zlib-${ZLIB_VERSION} \
         --with-pcre=../pcre2-${PCRE2_VERSION} \
         --with-pcre-jit \
+        --add-module=../ngx_http_geoip2_module-${NGX_GEOIP2_VERSION} \
         --with-cc-opt="-static -O3 -pipe -pthread -fopenmp -fstack-protector-strong -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -mtune=generic ${NGX_CFLAG}" \
         --with-ld-opt="-static -Wl,-O1 ${NGX_LFLAG}" \
     && make -j$(nproc) \
