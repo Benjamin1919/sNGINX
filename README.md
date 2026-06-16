@@ -53,6 +53,6 @@ then mount:
 
 
 ## Reference
-[Building Nginx from Sources](https://nginx.org/en/docs/configure.html)
-[docker/github-builder](https://github.com/docker/github-builder)
-[leev/ngx_http_geoip2_module](https://github.com/leev/ngx_http_geoip2_module)
+- [Building Nginx from Sources](https://nginx.org/en/docs/configure.html)
+- [docker/github-builder](https://github.com/docker/github-builder)
+- [leev/ngx_http_geoip2_module](https://github.com/leev/ngx_http_geoip2_module)
