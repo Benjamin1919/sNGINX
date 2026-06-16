@@ -1,0 +1,197 @@
+name: Build via amd64/arm64 Bare Metal
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    permissions:
+      contents: read
+      packages: read
+    runs-on: ubuntu-latest
+    outputs:
+      skip_build: ${{ steps.build_judge.outputs.skip_build }}
+      image_fullname: ${{ steps.build_judge.outputs.image_fullname }}
+      image_name: ${{ steps.build_judge.outputs.image_name }}
+      nginx_version: ${{ steps.build_judge.outputs.nginx_version }}
+      libxml2_version: ${{ steps.pre_output.outputs.libxml2_version }}
+      libxslt_version: ${{ steps.pre_output.outputs.libxslt_version }}
+      libgd_version: ${{ steps.pre_output.outputs.libgd_version }}
+      openssl_version: ${{ steps.pre_output.outputs.openssl_version }}
+      zlib_version: ${{ steps.pre_output.outputs.zlib_version }}
+      pcre2_version: ${{ steps.pre_output.outputs.pcre2_version }}
+      libmaxminddb_version: ${{ steps.pre_output.outputs.libmaxminddb_version }}
+      ngx_geoip2_version: ${{ steps.pre_output.outputs.ngx_geoip2_version }}
+    
+    steps:
+      - name: Convert to lowercase
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          REPO_FULLNAME: ${{ github.repository }}
+        run: |
+          echo "IMAGE_OWNER=${REPO_OWNER,,}" >> ${GITHUB_ENV}
+          echo "IMAGE_NAME=${REPO_NAME,,}" >> ${GITHUB_ENV}
+          echo "IMAGE_FULLNAME=${REPO_FULLNAME,,}" >> ${GITHUB_ENV}
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Get latest version of Nginx
+        run: bash scripts/get-ngx-git-ver.sh
+
+      - name: Check if Nginx version already exists in GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ env.NGINX_VERSION }}
+        run: |
+          set -euo pipefail
+
+          API_URL="https://api.github.com/users/${IMAGE_OWNER}/packages/container/${IMAGE_NAME}/versions?per_page=100"
+          AUTH_HEADER="Authorization: Bearer ${GHCR_TOKEN}"
+
+          echo "Querying ${API_URL} for existing tags..."
+          RESP=$(curl -s -w "\n%{http_code}" -H "${AUTH_HEADER}" -H "Accept: application/vnd.github+json" "${API_URL}")
+          STATUS_CODE=$(echo "$RESP" | tail -n1)
+          BODY=$(echo "$RESP" | sed '$d')
+
+          echo "GHCR API response status code: ${STATUS_CODE}"
+
+          case $STATUS_CODE in
+            200)
+              ;;
+            403)
+              echo "❌ GITHUB_TOKEN lacks read permission of packages."
+              exit 1
+              ;;
+            404)
+              echo "🚀 No packages found. Proceeding with build."
+              echo "SKIP_BUILD=false" >> ${GITHUB_ENV}
+              ;;
+            *)
+              echo "❌ Unexpected status code: ${STATUS_CODE}"
+              exit 1
+              ;;
+          esac
+
+          FOUND=$(echo "${BODY}" | jq -r '.[] | .metadata.container.tags[]?' | grep -Fx "${TAG}" || true)
+
+          if [ -n "${FOUND}" ]; then
+            echo "✅ Image tag ${TAG} already exists. Skipping build and push."
+            echo "SKIP_BUILD=true" >> ${GITHUB_ENV}
+          elif [ "${STATUS_CODE}" = "200" ]; then
+            echo "🚀 Image tag ${TAG} not found. Proceeding with build."
+            echo "SKIP_BUILD=false" >> ${GITHUB_ENV}
+          fi
+
+      - name: Build or Not
+        id: build_judge
+        run: |
+          echo "skip_build=${{ env.SKIP_BUILD }}" >> "$GITHUB_OUTPUT"
+          echo "image_fullname=${{ env.IMAGE_FULLNAME }}" >> "$GITHUB_OUTPUT"
+          echo "image_name=${{ env.IMAGE_NAME }}" >> "$GITHUB_OUTPUT"
+          echo "nginx_version=${{ env.NGINX_VERSION }}" >> "$GITHUB_OUTPUT"
+      
+      - name: Add summary if build skipped
+        if: env.SKIP_BUILD == 'true'
+        run: |
+          echo "### 🟡 Build Skipped" >> ${GITHUB_STEP_SUMMARY}
+          echo "The image tag **${{ env.NGINX_VERSION }}** already exists in GHCR." >> ${GITHUB_STEP_SUMMARY}
+          echo "No new build or push was performed." >> ${GITHUB_STEP_SUMMARY}
+
+      - name: Get latest versions of dependencies
+        if: env.SKIP_BUILD == 'false'
+        run: bash scripts/get-dep-ver.sh
+
+      - name: Transfer dep version info through outputs
+        id: pre_output
+        if: env.SKIP_BUILD == 'false'
+        run: |
+          echo "libxml2_version=${{ env.LIBXML2_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "libxslt_version=${{ env.LIBXSLT_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "libgd_version=${{ env.LIBGD_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "openssl_version=${{ env.OPENSSL_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "zlib_version=${{ env.ZLIB_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "pcre2_version=${{ env.PCRE2_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "libmaxminddb_version=${{ env.LIBMAXMINDDB_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "ngx_geoip2_version=${{ env.NGX_GEOIP2_VERSION }}" >> "$GITHUB_OUTPUT"
+
+
+  buildimage:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    needs: prepare
+    if: needs.prepare.outputs.skip_build == 'false'
+    uses: docker/github-builder/.github/workflows/build.yml@v1
+    with:
+      build-args: |
+        LIBXML2_VERSION=${{ needs.prepare.outputs.libxml2_version }}
+        LIBXSLT_VERSION=${{ needs.prepare.outputs.libxslt_version }}
+        LIBGD_VERSION=${{ needs.prepare.outputs.libgd_version }}
+        OPENSSL_VERSION=${{ needs.prepare.outputs.openssl_version }}
+        ZLIB_VERSION=${{ needs.prepare.outputs.zlib_version }}
+        PCRE2_VERSION=${{ needs.prepare.outputs.pcre2_version }}
+        LIBMAXMINDDB_VERSION=${{ needs.prepare.outputs.libmaxminddb_version }}
+        NGX_GEOIP2_VERSION=${{ needs.prepare.outputs.ngx_geoip2_version }}
+        NGINX_VERSION=${{ needs.prepare.outputs.nginx_version }}
+      context: .
+      file: docker/Dockerfile
+      labels: |
+        nginx_version=${{ needs.prepare.outputs.nginx_version }}
+        openssl_version=${{ needs.prepare.outputs.openssl_version }}
+        maintainer=https://github.com/${{ github.repository }}
+        libxml2_version=${{ needs.prepare.outputs.libxml2_version }}
+        libxslt_version=${{ needs.prepare.outputs.libxslt_version }}
+        libgd_version=${{ needs.prepare.outputs.libgd_version }}
+        zlib_version=${{ needs.prepare.outputs.zlib_version }}
+        pcre2_version=${{ needs.prepare.outputs.pcre2_version }}
+        libmaxminddb_version=${{ needs.prepare.outputs.libmaxminddb_version }}
+        ngx_geoip2_module_version=${{ needs.prepare.outputs.ngx_geoip2_version }}
+      output: image
+      platforms: linux/amd64,linux/arm64
+      push: true
+      meta-images: |
+        ${{ vars.DOCKERHUB_USERNAME }}/${{ needs.prepare.outputs.image_name }}
+        ghcr.io/${{ needs.prepare.outputs.image_fullname }}
+      meta-tags: |
+        type=raw,value=latest
+        type=raw,value=${{ needs.prepare.outputs.nginx_version }}
+    secrets:
+      registry-auths: |
+        - registry: docker.io
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        - registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+
+  buildsummary:
+    permissions:
+      contents: read
+    needs: [prepare, buildimage]
+    if: |
+      needs.prepare.outputs.skip_build == 'false' &&
+      needs.buildimage.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add summary if a new image is built
+        run: |
+          echo "### 🎉 Succeed in building a new image !" >> ${GITHUB_STEP_SUMMARY}
+          echo "**Version info:**" >> ${GITHUB_STEP_SUMMARY}
+          echo "- nginx: ${{ needs.prepare.outputs.nginx_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- openssl: ${{ needs.prepare.outputs.openssl_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- libxml2: ${{ needs.prepare.outputs.libxml2_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- libxslt: ${{ needs.prepare.outputs.libxslt_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- libgd: ${{ needs.prepare.outputs.libgd_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- zlib: ${{ needs.prepare.outputs.zlib_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- pcre2: ${{ needs.prepare.outputs.pcre2_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- libmaxminddb: ${{ needs.prepare.outputs.libmaxminddb_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "- ngx_http_geoip2_module: ${{ needs.prepare.outputs.ngx_geoip2_version }}" >> ${GITHUB_STEP_SUMMARY}
