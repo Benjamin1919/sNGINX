@@ -1,8 +1,7 @@
-name: Build and publish sNGINX image
-
+name: Build via QEMU
 on:
-  schedule:
-    - cron: "0 0 * * *"
+#  schedule:
+#    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:
@@ -74,7 +73,7 @@ jobs:
           if [ -n "${FOUND}" ]; then
             echo "✅ Image tag ${TAG} already exists. Skipping build and push."
             echo "SKIP_BUILD=true" >> ${GITHUB_ENV}
-          elif [ "${STATUS_CODE}"="200" ]; then
+          elif [ "${STATUS_CODE}" = "200" ]; then
             echo "🚀 Image tag ${TAG} not found. Proceeding with build."
             echo "SKIP_BUILD=false" >> ${GITHUB_ENV}
           fi
