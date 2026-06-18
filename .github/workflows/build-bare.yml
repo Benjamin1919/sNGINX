@@ -42,8 +42,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Get latest version of Nginx
-        run: bash scripts/get-ngx-git-ver.sh
+      - name: Get latest version of Nginx (mainline)
+        run: bash scripts/get-ngx-ver.sh
 
       - name: Check if Nginx version already exists in GHCR
         env:
@@ -161,8 +161,8 @@ jobs:
         ${{ vars.DOCKERHUB_USERNAME }}/${{ needs.prepare.outputs.image_name }}
         ghcr.io/${{ needs.prepare.outputs.image_fullname }}
       meta-tags: |
-        type=raw,value=latest
         type=raw,value=${{ needs.prepare.outputs.nginx_version }}
+        type=raw,value=latest
     secrets:
       registry-auths: |
         - registry: docker.io
