@@ -43,15 +43,15 @@ docker run -d --name sNGINX --network host benjamin1919/snginx
 - The container will listen on port 8080 (both IPv4 and IPv6) and a welcome page of nginx will appear if you visit `http://localhost:8080` with a browser on your host
 - Two anonymous volumes will be created (`/var/log/nginx` and `/var/tmp/nginx`) to avoid the container getting larger unexpectedly
 <br/>
-Anonymous volumes remain after the container is deleted, so it's recommended to mount `/var/log/nginx` and `/var/tmp/nginx` in production environment.
+Anonymous volumes remain after the container is deleted, so it's recommended to mount explicitly in production environment.
 
-`/var/log/nginx` stores access/error logs of nginx. Mount it on a certain directory (e.g. /var/log/nginx) of your host in order to inspect logs:
+- `/var/log/nginx` stores access/error logs of nginx. Mount it on a certain directory (e.g. /var/log/nginx) of your host in order to inspect logs:
 ```
 docker run ... \
     --mount type=bind,src=/var/log/nginx,dst=/var/log/nginx \
     benjamin1919/snginx
 ```
-`/var/tmp/nginx` stores temporary files of nginx. Mount it to a named volume because there's no need to inspect these files:
+- `/var/tmp/nginx` stores temporary files of nginx. Mount it to a named volume because there's no need to inspect these files:
 ```
 docker volume create nginx_tmp && \
 docker run ... \
