@@ -1,4 +1,4 @@
-name: Build Nginx of Certain Version
+name: Build with Certain Version
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ jobs:
       packages: read
     runs-on: ubuntu-latest
     env:
-      NGINX_VERSION: 1.30.2    # Assign certain version of Nginx
+      NGINX_VERSION: 1.30.3    # Assign certain version of Nginx
     outputs:
       skip_build: ${{ steps.build_judge.outputs.skip_build }}
       image_fullname: ${{ steps.build_judge.outputs.image_fullname }}
@@ -138,6 +138,7 @@ jobs:
         LIBMAXMINDDB_VERSION=${{ needs.prepare.outputs.libmaxminddb_version }}
         NGX_GEOIP2_VERSION=${{ needs.prepare.outputs.ngx_geoip2_version }}
         NGINX_VERSION=${{ needs.prepare.outputs.nginx_version }}
+      cache: false
       context: .
       file: docker/Dockerfile
       labels: |
@@ -154,12 +155,13 @@ jobs:
       output: image
       platforms: linux/amd64,linux/arm64
       push: true
+      sbom: true
       meta-images: |
         ${{ vars.DOCKERHUB_USERNAME }}/${{ needs.prepare.outputs.image_name }}
         ghcr.io/${{ needs.prepare.outputs.image_fullname }}
       meta-tags: |
-        # type=raw,value=latest       # You should check whether the version is latest
         type=raw,value=${{ needs.prepare.outputs.nginx_version }}
+        # type=raw,value=latest       # You should check whether the version is latest
     secrets:
       registry-auths: |
         - registry: docker.io
