@@ -45,7 +45,7 @@ docker run -d --name sNGINX --network host benjamin1919/snginx
 <br/>
 Anonymous volumes remain after the container is deleted, so it's recommended to mount explicitly in production environment.
 
-- `/var/log/nginx` stores access/error logs of nginx. Mount it on a certain directory (e.g. /var/log/nginx) of your host in order to inspect logs:
+- `/var/log/nginx` stores access/error logs of nginx. Mount it on a certain directory (e.g. `/var/log/nginx`) of your host in order to inspect logs:
 ```
 docker run ... \
     --mount type=bind,src=/var/log/nginx,dst=/var/log/nginx \
