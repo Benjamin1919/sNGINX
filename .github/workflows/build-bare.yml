@@ -2,7 +2,7 @@ name: Build via amd64/arm64 Bare Metal
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 16 * * *"
   workflow_dispatch:
 
 permissions:
@@ -141,6 +141,7 @@ jobs:
         LIBMAXMINDDB_VERSION=${{ needs.prepare.outputs.libmaxminddb_version }}
         NGX_GEOIP2_VERSION=${{ needs.prepare.outputs.ngx_geoip2_version }}
         NGINX_VERSION=${{ needs.prepare.outputs.nginx_version }}
+      cache: false
       context: .
       file: docker/Dockerfile
       labels: |
@@ -157,6 +158,7 @@ jobs:
       output: image
       platforms: linux/amd64,linux/arm64
       push: true
+      sbom: true
       meta-images: |
         ${{ vars.DOCKERHUB_USERNAME }}/${{ needs.prepare.outputs.image_name }}
         ghcr.io/${{ needs.prepare.outputs.image_fullname }}
