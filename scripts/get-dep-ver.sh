@@ -21,7 +21,7 @@ NGX_GEOIP2_VERSION=$(curl -s --connect-timeout 10 --retry 2 --retry-delay 5 "htt
 
 
 if [ -z "$LIBXML2_VERSION" ]; then
-  echo "❌ Failed to fetch libxml2 latest version, fallback to 2.15.2"
+  echo "❌ Failed to fetch libxml2 latest version, fallback to 2.15.3"
   LIBXML2_VERSION=2.15.3
 else
   echo "✅ LIBXML2_VERSION=$LIBXML2_VERSION"
@@ -42,7 +42,7 @@ else
 fi
 
 if [ -z "$OPENSSL_VERSION" ]; then
-  echo "❌ Failed to fetch OpenSSL latest version, fallback to 3.6.2"
+  echo "❌ Failed to fetch OpenSSL latest version, fallback to 4.0.1"
   OPENSSL_VERSION=4.0.1
 else
   echo "✅ OPENSSL_VERSION=$OPENSSL_VERSION"
