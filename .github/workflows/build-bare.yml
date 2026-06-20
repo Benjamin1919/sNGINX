@@ -2,7 +2,7 @@ name: Build via amd64/arm64 Bare Metal
 
 on:
   schedule:
-    - cron: "0 17 * * *"
+    - cron: "0 18 * * *"
   workflow_dispatch:
 
 permissions:
