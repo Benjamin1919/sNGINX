@@ -35,9 +35,9 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
           REPO_FULLNAME: ${{ github.repository }}
         run: |
-          echo "IMAGE_OWNER=${REPO_OWNER,,}" >> ${GITHUB_ENV}
-          echo "IMAGE_NAME=${REPO_NAME,,}" >> ${GITHUB_ENV}
-          echo "IMAGE_FULLNAME=${REPO_FULLNAME,,}" >> ${GITHUB_ENV}
+          echo "IMAGE_OWNER=${REPO_OWNER,,}" >> "$GITHUB_ENV"
+          echo "IMAGE_NAME=${REPO_NAME,,}" >> "$GITHUB_ENV"
+          echo "IMAGE_FULLNAME=${REPO_FULLNAME,,}" >> "$GITHUB_ENV"
 
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -53,14 +53,14 @@ jobs:
           set -euo pipefail
 
           API_URL="https://api.github.com/users/${IMAGE_OWNER}/packages/container/${IMAGE_NAME}/versions?per_page=100"
-          AUTH_HEADER="Authorization: Bearer ${GHCR_TOKEN}"
+          AUTH_HEADER="Authorization: Bearer $GHCR_TOKEN"
 
-          echo "Querying ${API_URL} for existing tags..."
-          RESP=$(curl -s -w "\n%{http_code}" -H "${AUTH_HEADER}" -H "Accept: application/vnd.github+json" "${API_URL}")
+          echo "Querying $API_URL for existing tags..."
+          RESP=$(curl -s -w "\n%{http_code}" -H "$AUTH_HEADER" -H "Accept: application/vnd.github+json" "$API_URL")
           STATUS_CODE=$(echo "$RESP" | tail -n1)
           BODY=$(echo "$RESP" | sed '$d')
 
-          echo "GHCR API response status code: ${STATUS_CODE}"
+          echo "GHCR API response status code: $STATUS_CODE"
 
           case $STATUS_CODE in
             200)
@@ -71,22 +71,22 @@ jobs:
               ;;
             404)
               echo "🚀 No packages found. Proceeding with build."
-              echo "SKIP_BUILD=false" >> ${GITHUB_ENV}
+              echo "SKIP_BUILD=false" >> "$GITHUB_ENV"
               ;;
             *)
-              echo "❌ Unexpected status code: ${STATUS_CODE}"
+              echo "❌ Unexpected status code: $STATUS_CODE"
               exit 1
               ;;
           esac
 
-          FOUND=$(echo "${BODY}" | jq -r '.[] | .metadata.container.tags[]?' | grep -Fx "${TAG}" || true)
+          FOUND=$(echo "$BODY" | jq -r '.[] | .metadata.container.tags[]?' | grep -Fx "$TAG" || true)
 
-          if [ -n "${FOUND}" ]; then
-            echo "✅ Image tag ${TAG} already exists. Skipping build and push."
-            echo "SKIP_BUILD=true" >> ${GITHUB_ENV}
-          elif [ "${STATUS_CODE}" = "200" ]; then
-            echo "🚀 Image tag ${TAG} not found. Proceeding with build."
-            echo "SKIP_BUILD=false" >> ${GITHUB_ENV}
+          if [ -n "$FOUND" ]; then
+            echo "✅ Image tag $TAG already exists. Skipping build and push."
+            echo "SKIP_BUILD=true" >> "$GITHUB_ENV"
+          elif [ "$STATUS_CODE" = "200" ]; then
+            echo "🚀 Image tag $TAG not found. Proceeding with build."
+            echo "SKIP_BUILD=false" >> "$GITHUB_ENV"
           fi
 
       - name: Build or Not
@@ -100,9 +100,9 @@ jobs:
       - name: Add summary if build skipped
         if: env.SKIP_BUILD == 'true'
         run: |
-          echo "### 🟡 Build Skipped" >> ${GITHUB_STEP_SUMMARY}
-          echo "The image tag **${{ env.NGINX_VERSION }}** already exists in GHCR." >> ${GITHUB_STEP_SUMMARY}
-          echo "No new build or push was performed." >> ${GITHUB_STEP_SUMMARY}
+          echo "### 🟡 Build Skipped" >> "$GITHUB_STEP_SUMMARY"
+          echo "The image tag **${{ env.NGINX_VERSION }}** already exists in GHCR." >> "$GITHUB_STEP_SUMMARY"
+          echo "No new build or push was performed." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Get latest versions of dependencies
         if: env.SKIP_BUILD == 'false'
@@ -156,7 +156,9 @@ jobs:
         libmaxminddb_version=${{ needs.prepare.outputs.libmaxminddb_version }}
         ngx_geoip2_module_version=${{ needs.prepare.outputs.ngx_geoip2_version }}
       output: image
-      platforms: linux/amd64,linux/arm64
+      platforms: |
+        linux/amd64
+        linux/arm64
       push: true
       sbom: true
       meta-images: |
@@ -186,14 +188,14 @@ jobs:
     steps:
       - name: Add summary if a new image is built
         run: |
-          echo "### 🎉 Succeed in building a new image !" >> ${GITHUB_STEP_SUMMARY}
-          echo "**Version info:**" >> ${GITHUB_STEP_SUMMARY}
-          echo "- nginx: ${{ needs.prepare.outputs.nginx_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "- openssl: ${{ needs.prepare.outputs.openssl_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "- libxml2: ${{ needs.prepare.outputs.libxml2_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "- libxslt: ${{ needs.prepare.outputs.libxslt_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "- libgd: ${{ needs.prepare.outputs.libgd_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "- zlib: ${{ needs.prepare.outputs.zlib_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "- pcre2: ${{ needs.prepare.outputs.pcre2_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "- libmaxminddb: ${{ needs.prepare.outputs.libmaxminddb_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "- ngx_http_geoip2_module: ${{ needs.prepare.outputs.ngx_geoip2_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "### 🎉 Succeed in building a new image !" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Version info:**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- nginx: ${{ needs.prepare.outputs.nginx_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- openssl: ${{ needs.prepare.outputs.openssl_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- libxml2: ${{ needs.prepare.outputs.libxml2_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- libxslt: ${{ needs.prepare.outputs.libxslt_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- libgd: ${{ needs.prepare.outputs.libgd_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- zlib: ${{ needs.prepare.outputs.zlib_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- pcre2: ${{ needs.prepare.outputs.pcre2_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- libmaxminddb: ${{ needs.prepare.outputs.libmaxminddb_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ngx_http_geoip2_module: ${{ needs.prepare.outputs.ngx_geoip2_version }}" >> "$GITHUB_STEP_SUMMARY"
