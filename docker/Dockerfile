@@ -37,8 +37,6 @@ RUN (wget -q --content-disposition "https://github.com/leev/ngx_http_geoip2_modu
 
 RUN (wget -q "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch source code from Nginx"; exit 1; }) \
     && tar -zxf nginx-${NGINX_VERSION}.tar.gz
-# RUN (wget -q "https://github.com/nginx/nginx/releases/download/release-${NGINX_VERSION}/nginx-${NGINX_VERSION}.tar.gz" || { echo "❌ Failed to fetch Nginx from GitHub"; exit 1; }) \
-#    && tar -zxf nginx-${NGINX_VERSION}.tar.gz
 
 RUN apt install --no-install-recommends --no-install-suggests -y \
     build-essential pkg-config autoconf automake libtool python3-dev nasm
@@ -91,6 +89,7 @@ RUN cd nginx-${NGINX_VERSION} \
     && ./configure \
         --prefix=/usr/local/nginx \
         --sbin-path=/usr/local/sbin/nginx \
+        --modules-path=/etc/nginx/modules \
         --conf-path=/etc/nginx/nginx.conf \
         --error-log-path=/var/log/nginx/error.log \
         --pid-path=/var/run/nginx.pid \
@@ -137,6 +136,7 @@ RUN cd nginx-${NGINX_VERSION} \
         --with-pcre=../pcre2-${PCRE2_VERSION} \
         --with-pcre-jit \
         --add-module=../ngx_http_geoip2_module-${NGX_GEOIP2_VERSION} \
+        --with-compat \
         --with-cc-opt="-static -O3 -pipe -pthread -fopenmp -fstack-protector-strong -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -mtune=generic ${NGX_CFLAG}" \
         --with-ld-opt="-static -Wl,-O1 ${NGX_LFLAG}" \
     && make -j$(nproc) \
