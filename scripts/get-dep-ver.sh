@@ -50,7 +50,7 @@ fi
 
 if [ -z "$ZLIB_VERSION" ]; then
   echo "❌ Failed to fetch zlib latest version, fallback to 1.3.2"
-  PCRE2_VERSION=1.3.2
+  ZLIB_VERSION=1.3.2
 else
   echo "✅ ZLIB_VERSION=$ZLIB_VERSION"
 fi
