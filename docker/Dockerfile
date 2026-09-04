@@ -124,6 +124,7 @@ RUN cd nginx-${NGINX_VERSION} \
         --with-http_degradation_module \
         --with-http_slice_module \
         --with-http_stub_status_module \
+        --with-http_json_module \
         --with-mail \
         --with-mail_ssl_module \
         --with-stream \
