@@ -35,6 +35,43 @@ docker run -d --name sNGINX --network host --restart unless-stopped \
 * Note: It's better not to mount the whole  `/etc/nginx` directory because other files in this directory (fastcgi_params, fastcgi.conf, koi-utf, koi-win, mime.types, scgi_params, uwsgi_params, win-utf) will disappear
 * Mirror: ghcr.io/benjamin1919/snginx
 
+Alternatively, use Docker Compose to manage the container:
+```
+services:
+  snginx:
+    container_name: sNGINX
+    image: benjamin1919/snginx
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /usr/local/etc/nginx/nginx.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
+      - type: bind
+        source: /usr/local/etc/nginx/conf.d
+        target: /etc/nginx/conf.d
+        read_only: true
+      - type: bind
+        source: /usr/local/etc/nginx/ssl
+        target: /etc/nginx/ssl
+        read_only: true
+      - type: bind
+        source: /usr/local/share/html
+        target: /usr/local/share/html
+        read_only: true
+      - type: bind
+        source: /var/log/nginx
+        target: /var/log/nginx
+      - type: volume
+        source: nginx_tmp
+        target: /var/tmp/nginx
+
+volumes:
+  nginx_tmp:
+    name: nginx_tmp
+```
+
 ## Default Behavior
 If a container is simply created using the command:
 ```
