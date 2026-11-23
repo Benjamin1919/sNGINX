@@ -143,7 +143,7 @@ jobs:
         NGINX_VERSION=${{ needs.prepare.outputs.nginx_version }}
       cache: false
       context: .
-      file: docker/Dockerfile-test
+      file: docker/Dockerfile-test2
       labels: |
         nginx_version=${{ needs.prepare.outputs.nginx_version }}
         openssl_version=${{ needs.prepare.outputs.openssl_version }}
