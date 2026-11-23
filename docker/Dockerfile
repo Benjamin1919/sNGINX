@@ -11,6 +11,10 @@ ARG LIBMAXMINDDB_VERSION
 ARG NGX_GEOIP2_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV COMMON_FLAGS="-O2 -ffunction-sections -fdata-sections"
+ENV CFLAGS="${COMMON_FLAGS}"
+ENV CXXFLAGS="${COMMON_FLAGS} -fno-exceptions -fno-rtti"
+
 SHELL ["/bin/bash", "-c"]
 WORKDIR /usr/local/src
 
@@ -138,8 +142,8 @@ RUN cd nginx-${NGINX_VERSION} \
         --with-pcre-jit \
         --add-module=../ngx_http_geoip2_module-${NGX_GEOIP2_VERSION} \
         --with-compat \
-        --with-cc-opt="-static -O3 -pipe -pthread -fopenmp -fstack-protector-strong -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -mtune=generic ${NGX_CFLAG}" \
-        --with-ld-opt="-static -Wl,-O1 ${NGX_LFLAG}" \
+        --with-cc-opt="${COMMON_FLAGS} -pipe -pthread -fopenmp -fstack-protector-strong -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -mtune=generic ${NGX_CFLAG}" \
+        --with-ld-opt="-static -Wl,-O1 -Wl,--gc-sections ${NGX_LFLAG}" \
     && make -j$(nproc) \
     && make install
 
