@@ -11,12 +11,13 @@ ARG LIBMAXMINDDB_VERSION
 ARG NGX_GEOIP2_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV COMMON_FLAGS="-O2 -ffunction-sections -fdata-sections"
-ENV CFLAGS="${COMMON_FLAGS}"
-ENV CXXFLAGS="${COMMON_FLAGS} -fno-exceptions -fno-rtti"
+ENV PREFIX=/usr/local
+
+ENV COMMON_FLAGS="-O2 -ffunction-sections -fdata-sections -pipe -fstack-protector-strong -Wformat -D_FORTIFY_SOURCE=2 -mtune=generic"
+ENV CFLAGS="${COMMON_FLAGS} -I${PREFIX}/include"
 
 SHELL ["/bin/bash", "-c"]
-WORKDIR /usr/local/src
+WORKDIR ${PREFIX}/src
 
 RUN apt update && apt install --no-install-recommends --no-install-suggests -y ca-certificates wget
 
@@ -46,12 +47,12 @@ RUN apt install --no-install-recommends --no-install-suggests -y \
     build-essential pkg-config autoconf automake libtool python3-dev nasm
 
 RUN cd libxml2-v${LIBXML2_VERSION} \
-    && ./autogen.sh --prefix=/usr/local --enable-static --disable-shared \
+    && ./autogen.sh --prefix=${PREFIX} --enable-static --disable-shared \
     && make -j$(nproc) \
     && make install
 
 RUN cd libxslt-v${LIBXSLT_VERSION} \
-    && ./autogen.sh --prefix=/usr/local --enable-static --disable-shared \
+    && ./autogen.sh --prefix=${PREFIX} --enable-static --disable-shared \
     && make -j$(nproc) \
     && make install
 
@@ -64,7 +65,7 @@ RUN apt install --no-install-recommends --no-install-suggests -y \
     xtrans-dev libx11-dev libxpm-dev
 
 RUN cd libgd-${LIBGD_VERSION} \
-    && ./configure --prefix=/usr/local --enable-static --disable-shared \
+    && ./configure --prefix=${PREFIX} --enable-static --disable-shared \
         --disable-gd-formats --with-zlib --with-png --with-freetype \
         --with-fontconfig --with-jpeg --with-liq --with-xpm --with-tiff --with-webp \
         --without-heif --without-avif --without-raqm \
@@ -72,12 +73,12 @@ RUN cd libgd-${LIBGD_VERSION} \
     && make install
 
 RUN cd GeoIP-1.6.12 \
-    && ./configure --prefix=/usr/local --enable-static --disable-shared \
+    && ./configure --prefix=${PREFIX} --enable-static --disable-shared \
     && make -j$(nproc) \
     && make install
 
 RUN cd libmaxminddb-${LIBMAXMINDDB_VERSION} \
-    && ./configure --prefix=/usr/local --enable-static --disable-shared \
+    && ./configure --prefix=${PREFIX} --enable-static --disable-shared \
     && make -j$(nproc) \
     && make install
 
@@ -142,7 +143,7 @@ RUN cd nginx-${NGINX_VERSION} \
         --with-pcre-jit \
         --add-module=../ngx_http_geoip2_module-${NGX_GEOIP2_VERSION} \
         --with-compat \
-        --with-cc-opt="${COMMON_FLAGS} -pipe -pthread -fopenmp -fstack-protector-strong -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=4 -mtune=generic ${NGX_CFLAG}" \
+        --with-cc-opt="${COMMON_FLAGS} -Werror=format-security ${NGX_CFLAG}" \
         --with-ld-opt="-static -Wl,-O1 -Wl,--gc-sections ${NGX_LFLAG}" \
     && make -j$(nproc) \
     && make install
