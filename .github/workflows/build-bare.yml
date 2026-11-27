@@ -40,7 +40,7 @@ jobs:
           echo "IMAGE_FULLNAME=${REPO_FULLNAME,,}" >> "$GITHUB_ENV"
 
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get latest version of Nginx (mainline)
         run: bash scripts/get-ngx-ver.sh
